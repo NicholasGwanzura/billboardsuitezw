@@ -1,5 +1,5 @@
 {
-  "name": "copy-of-billboard-suite",
+  "name": "billboard-suite",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -16,7 +16,8 @@
     "jspdf": "2.5.1",
     "jspdf-autotable": "3.8.2",
     "@google/genai": "^1.30.0",
-    "leaflet": "1.9.4"
+    "leaflet": "1.9.4",
+    "luc": "^0.3.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

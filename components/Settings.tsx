@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { getUsers, addUser, updateUser, deleteUser, getAuditLogs, getCompanyLogo, setCompanyLogo, RELEASE_NOTES, resetSystemData } from '../services/mockData';
 import { User, Shield, Building, ScrollText, Download, Plus, X, Save, Mail, Phone, Globe, MapPin, Edit2, Trash2, AlertTriangle, Cloud, Upload, History, Check, RefreshCw } from 'lucide-react';
@@ -6,35 +5,16 @@ import { User as UserType } from '../types';
 
 const MinimalInput = ({ label, value, defaultValue, onChange, type = "text", required = false }: any) => (
   <div className="group relative">
-    <input 
-      type={type} 
-      required={required}
-      value={value}
-      defaultValue={defaultValue}
-      onChange={onChange}
-      placeholder=" "
-      className="peer w-full px-0 py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium placeholder-transparent" 
-    />
-    <label className="absolute left-0 -top-2.5 text-xs text-slate-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2.5 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-slate-800 uppercase tracking-wide">
-      {label}
-    </label>
+    <input type={type} required={required} value={value} defaultValue={defaultValue} onChange={onChange} placeholder=" " className="peer w-full px-0 py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium placeholder-transparent" />
+    <label className="absolute left-0 -top-2.5 text-xs text-slate-400 font-medium transition-all peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-2.5 peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-slate-800 uppercase tracking-wide">{label}</label>
   </div>
 );
-
 const MinimalSelect = ({ label, value, onChange, options }: any) => (
   <div className="group relative">
-    <select 
-      value={value}
-      onChange={onChange}
-      className="peer w-full px-0 py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium appearance-none cursor-pointer" 
-    >
-      {options.map((opt: any) => (
-        <option key={opt.value} value={opt.value}>{opt.label}</option>
-      ))}
+    <select value={value} onChange={onChange} className="peer w-full px-0 py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium appearance-none cursor-pointer">
+      {options.map((opt: any) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
     </select>
-    <label className="absolute left-0 -top-2.5 text-xs text-slate-400 font-medium uppercase tracking-wide">
-      {label}
-    </label>
+    <label className="absolute left-0 -top-2.5 text-xs text-slate-400 font-medium uppercase tracking-wide">{label}</label>
   </div>
 );
 
@@ -42,496 +22,36 @@ export const Settings: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'General' | 'Audit' | 'ReleaseNotes'>('General');
   const [users, setUsers] = useState<UserType[]>(getUsers());
   const auditLogs = getAuditLogs();
-  
-  // Logo State
   const [logoPreview, setLogoPreview] = useState(getCompanyLogo());
   const fileInputRef = useRef<HTMLInputElement>(null);
-
   const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserType | null>(null);
   const [userToDelete, setUserToDelete] = useState<UserType | null>(null);
   const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
-  
-  const [newUser, setNewUser] = useState<Partial<UserType>>({
-      firstName: '',
-      lastName: '',
-      email: '',
-      role: 'Staff'
-  });
+  const [newUser, setNewUser] = useState<Partial<UserType>>({ firstName: '', lastName: '', email: '', role: 'Staff' });
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const file = e.target.files?.[0];
-      if (file) {
-          const url = URL.createObjectURL(file);
-          setLogoPreview(url);
-          setCompanyLogo(url); // Update Mock Store
-      }
-  };
-
-  const handleAddUser = (e: React.FormEvent) => {
-      e.preventDefault();
-      const user: UserType = {
-          id: (users.length + 1).toString(),
-          firstName: newUser.firstName!,
-          lastName: newUser.lastName!,
-          email: newUser.email!,
-          role: newUser.role as 'Admin' | 'Manager' | 'Staff',
-          password: 'password123'
-      };
-      addUser(user);
-      setUsers(getUsers()); // Refresh
-      setIsAddUserModalOpen(false);
-      setNewUser({ firstName: '', lastName: '', email: '', role: 'Staff' });
-  };
-
-  const handleEditUser = (e: React.FormEvent) => {
-      e.preventDefault();
-      if (editingUser) {
-          updateUser(editingUser);
-          setUsers(getUsers());
-          setEditingUser(null);
-      }
-  };
-
-  const handleConfirmDelete = () => {
-      if (userToDelete) {
-          deleteUser(userToDelete.id);
-          setUsers(getUsers());
-          setUserToDelete(null);
-      }
-  };
-
-  const handleExportAuditLogs = () => {
-      if (auditLogs.length === 0) {
-          alert("No logs to export.");
-          return;
-      }
-      
-      const csvHeader = "ID,Timestamp,User,Action,Details\n";
-      const csvRows = auditLogs.map(log => 
-          `${log.id},"${log.timestamp}","${log.user}","${log.action}","${log.details.replace(/"/g, '""')}"`
-      ).join("\n");
-      
-      const csvContent = csvHeader + csvRows;
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `audit_logs_${new Date().toISOString().slice(0,10)}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-  };
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => { const file = e.target.files?.[0]; if (file) { const url = URL.createObjectURL(file); setLogoPreview(url); setCompanyLogo(url); } };
+  const handleAddUser = (e: React.FormEvent) => { e.preventDefault(); const user: UserType = { id: (users.length + 1).toString(), firstName: newUser.firstName!, lastName: newUser.lastName!, email: newUser.email!, role: newUser.role as 'Admin' | 'Manager' | 'Staff', password: 'password123' }; addUser(user); setUsers(getUsers()); setIsAddUserModalOpen(false); setNewUser({ firstName: '', lastName: '', email: '', role: 'Staff' }); };
+  const handleEditUser = (e: React.FormEvent) => { e.preventDefault(); if (editingUser) { updateUser(editingUser); setUsers(getUsers()); setEditingUser(null); } };
+  const handleConfirmDelete = () => { if (userToDelete) { deleteUser(userToDelete.id); setUsers(getUsers()); setUserToDelete(null); } };
+  const handleExportAuditLogs = () => { if (auditLogs.length === 0) { alert("No logs to export."); return; } const csvRows = auditLogs.map(log => `${log.id},"${log.timestamp}","${log.user}","${log.action}","${log.details.replace(/"/g, '""')}"`).join("\n"); const blob = new Blob(["ID,Timestamp,User,Action,Details\n" + csvRows], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob); const link = document.createElement('a'); link.href = url; link.setAttribute('download', `audit_logs_${new Date().toISOString().slice(0,10)}.csv`); document.body.appendChild(link); link.click(); document.body.removeChild(link); };
 
   return (
     <>
       <div className="space-y-8 animate-fade-in">
-        <div className="flex justify-between items-center">
-          <div>
-              <h2 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 mb-2">System Settings</h2>
-              <p className="text-slate-500 font-medium">Manage organization profile, users, and system audit logs</p>
-          </div>
-          <div className="flex bg-white rounded-full border border-slate-200 p-1 shadow-sm">
-              <button onClick={() => setActiveTab('General')} className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'General' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>General</button>
-              <button onClick={() => setActiveTab('Audit')} className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'Audit' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>Audit Logs</button>
-              <button onClick={() => setActiveTab('ReleaseNotes')} className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'ReleaseNotes' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>Release Notes</button>
-          </div>
-        </div>
-
+        <div className="flex justify-between items-center"><div><h2 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 mb-2">System Settings</h2><p className="text-slate-500 font-medium">Manage organization profile, users, and system audit logs</p></div><div className="flex bg-white rounded-full border border-slate-200 p-1 shadow-sm"><button onClick={() => setActiveTab('General')} className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'General' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>General</button><button onClick={() => setActiveTab('Audit')} className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'Audit' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>Audit Logs</button><button onClick={() => setActiveTab('ReleaseNotes')} className={`px-5 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'ReleaseNotes' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-500 hover:text-slate-900'}`}>Release Notes</button></div></div>
         {activeTab === 'General' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
-          {/* Company Settings */}
-          <div className="lg:col-span-2 space-y-8">
-            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100">
-                <div className="flex items-center gap-3 mb-8">
-                  <div className="p-3 bg-blue-50 rounded-xl">
-                      <Building className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-800">Company Profile</h3>
-                </div>
-                
-                <div className="space-y-8">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="md:col-span-2">
-                          <MinimalInput label="Company Registered Name" defaultValue="Spiritus Systems" />
-                      </div>
-                      <MinimalInput label="Tax ID / VAT Number" defaultValue="VAT-9928371" />
-                      <MinimalInput label="Registration Number" defaultValue="REG-2025/001" />
-                  </div>
-
-                  <div className="border-t border-slate-50 pt-6">
-                      <h4 className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 tracking-wider mb-6">
-                          <Phone size={14} /> Contact Information
-                      </h4>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <MinimalInput label="General Email" defaultValue="admin@spiritus.com" type="email" />
-                          <MinimalInput label="Support Email" defaultValue="support@spiritus.com" type="email" />
-                          <MinimalInput label="Phone Number" defaultValue="+263 772 123 456" type="tel" />
-                          <MinimalInput label="Website" defaultValue="www.spiritus.com" />
-                      </div>
-                  </div>
-
-                  <div className="border-t border-slate-50 pt-6">
-                      <h4 className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 tracking-wider mb-6">
-                          <MapPin size={14} /> Location Details
-                      </h4>
-                      <div className="space-y-6">
-                          <MinimalInput label="Street Address" defaultValue="123 Business Park, Enterprise Way" />
-                          <div className="grid grid-cols-2 gap-8">
-                              <MinimalInput label="City" defaultValue="Harare" />
-                              <MinimalInput label="Country" defaultValue="Zimbabwe" />
-                          </div>
-                      </div>
-                  </div>
-                </div>
-
-                <div className="mt-8 flex justify-end pt-4 border-t border-slate-50">
-                  <button className="px-8 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-slate-800 shadow-lg shadow-slate-900/20 transition-all hover:scale-105">Save Changes</button>
-                </div>
-            </div>
-
-            {/* User Management */}
-            <div className="bg-white shadow-sm rounded-2xl border border-slate-100 overflow-hidden">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                      <div className="p-2 bg-green-50 rounded-xl">
-                        <Shield className="w-6 h-6 text-green-600" />
-                      </div>
-                      <h3 className="text-lg font-bold text-slate-800">User Access Control</h3>
-                  </div>
-                  <button onClick={() => setIsAddUserModalOpen(true)} className="flex items-center gap-1 text-sm text-blue-600 font-bold uppercase tracking-wider hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors">
-                      <Plus size={16} /> Add User
-                  </button>
-                </div>
-                <table className="w-full text-left text-sm text-slate-600">
-                  <thead className="bg-slate-50/50 border-b border-slate-100">
-                    <tr>
-                      <th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">User</th>
-                      <th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Email</th>
-                      <th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Role</th>
-                      <th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider text-right">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {users.map(user => (
-                        <tr key={user.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="px-6 py-4 font-medium text-slate-900 flex items-center gap-2">
-                              <div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold border border-slate-300">
-                                <User size={14} />
-                              </div>
-                              {user.firstName} {user.lastName}
-                          </td>
-                          <td className="px-6 py-4">{user.email}</td>
-                          <td className="px-6 py-4">
-                              <span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider ${
-                                user.role === 'Admin' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'
-                              }`}>
-                                {user.role}
-                              </span>
-                          </td>
-                          <td className="px-6 py-4 flex justify-end gap-2">
-                              <button onClick={() => setEditingUser(user)} className="p-2 text-slate-400 hover:bg-white hover:shadow-sm hover:text-slate-800 rounded-lg transition-all border border-transparent hover:border-slate-100">
-                                  <Edit2 size={16} />
-                              </button>
-                              <button onClick={() => setUserToDelete(user)} className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors">
-                                  <Trash2 size={16} />
-                              </button>
-                          </td>
-                        </tr>
-                    ))}
-                  </tbody>
-                </table>
-            </div>
-
-            {/* Danger Zone */}
-            <div className="bg-white shadow-sm rounded-2xl border border-slate-100 overflow-hidden">
-                 <div className="p-6 bg-red-50/30 border-b border-red-50 flex items-center gap-3">
-                    <div className="p-2 bg-red-100 rounded-xl text-red-600"><AlertTriangle size={20}/></div>
-                    <h3 className="text-lg font-bold text-slate-800">Danger Zone</h3>
-                 </div>
-                 <div className="p-6 flex items-center justify-between">
-                     <div>
-                         <p className="text-sm font-bold text-slate-700">Reset Application Data</p>
-                         <p className="text-xs text-slate-500 mt-1">This will restore the original billboard inventory and clear all current rentals.</p>
-                     </div>
-                     <button 
-                        onClick={() => setIsResetConfirmOpen(true)}
-                        className="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
-                     >
-                        Reset Data
-                     </button>
-                 </div>
-            </div>
-          </div>
-
-          {/* Branding Preview / Logo */}
-          <div className="space-y-6">
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-                <h3 className="text-lg font-bold text-slate-800 mb-6">Branding & Identity</h3>
-                <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-200 rounded-2xl mb-6 bg-slate-50/50 hover:bg-slate-50 transition-colors">
-                  <div className="text-center relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
-                      <div className="w-24 h-24 bg-white rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden shadow-md border-4 border-white group-hover:scale-105 transition-transform">
-                        <img src={logoPreview} alt="Logo" className="w-full h-full object-cover"/>
-                      </div>
-                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                          <div className="bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">Change</div>
-                      </div>
-                      <p className="text-sm font-medium text-slate-600">Company Logo</p>
-                      <p className="text-xs text-slate-400 mt-1">Click to Upload</p>
-                      <input 
-                          type="file" 
-                          ref={fileInputRef} 
-                          className="hidden" 
-                          accept="image/*"
-                          onChange={handleLogoUpload}
-                      />
-                  </div>
-                </div>
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="w-full py-3 border border-slate-200 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2"
-                >
-                    <Upload size={14}/> Upload New Logo
-                </button>
-            </div>
-            
-            <div className="bg-gradient-to-br from-blue-900 to-slate-900 p-6 rounded-2xl shadow-lg text-white relative overflow-hidden group">
-                <div className="relative z-10">
-                    <h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Cloud size={18}/> System Status</h3>
-                    <div className="flex items-center gap-2 mb-6">
-                        <div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div>
-                        <span className="text-blue-100 text-sm font-medium">Systems Operational</span>
-                    </div>
-                    
-                    <div className="space-y-2 text-xs text-blue-200/80 border-t border-white/10 pt-4 font-mono">
-                      <p>Version: <span className="text-white">1.1.0</span></p>
-                      <p>Build: <span className="text-white">Production-Stable</span></p>
-                      <p>Last Update: {new Date().toLocaleDateString()}</p>
-                    </div>
-                </div>
-                {/* Decorative elements */}
-                <div className="absolute -bottom-12 -right-12 w-48 h-48 bg-blue-500 rounded-full blur-3xl opacity-20 group-hover:opacity-30 transition-opacity"></div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-10"></div>
-            </div>
-          </div>
-        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in"><div className="lg:col-span-2 space-y-8"><div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100"><div className="flex items-center gap-3 mb-8"><div className="p-3 bg-blue-50 rounded-xl"><Building className="w-6 h-6 text-blue-600" /></div><h3 className="text-xl font-bold text-slate-800">Company Profile</h3></div><div className="space-y-8"><div className="grid grid-cols-1 md:grid-cols-2 gap-8"><div className="md:col-span-2"><MinimalInput label="Company Registered Name" defaultValue="Spiritus Systems" /></div><MinimalInput label="Tax ID / VAT Number" defaultValue="VAT-9928371" /><MinimalInput label="Registration Number" defaultValue="REG-2025/001" /></div><div className="border-t border-slate-50 pt-6"><h4 className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 tracking-wider mb-6"><Phone size={14} /> Contact Information</h4><div className="grid grid-cols-1 md:grid-cols-2 gap-8"><MinimalInput label="General Email" defaultValue="admin@spiritus.com" type="email" /><MinimalInput label="Support Email" defaultValue="support@spiritus.com" type="email" /><MinimalInput label="Phone Number" defaultValue="+263 772 123 456" type="tel" /><MinimalInput label="Website" defaultValue="www.spiritus.com" /></div></div><div className="border-t border-slate-50 pt-6"><h4 className="flex items-center gap-2 text-xs font-bold uppercase text-slate-400 tracking-wider mb-6"><MapPin size={14} /> Location Details</h4><div className="space-y-6"><MinimalInput label="Street Address" defaultValue="123 Business Park, Enterprise Way" /><div className="grid grid-cols-2 gap-8"><MinimalInput label="City" defaultValue="Harare" /><MinimalInput label="Country" defaultValue="Zimbabwe" /></div></div></div></div><div className="mt-8 flex justify-end pt-4 border-t border-slate-50"><button className="px-8 py-3 bg-slate-900 text-white rounded-xl text-sm font-bold uppercase tracking-wider hover:bg-slate-800 shadow-lg shadow-slate-900/20 transition-all hover:scale-105">Save Changes</button></div></div><div className="bg-white shadow-sm rounded-2xl border border-slate-100 overflow-hidden"><div className="p-6 border-b border-slate-100 flex justify-between items-center"><div className="flex items-center gap-3"><div className="p-2 bg-green-50 rounded-xl"><Shield className="w-6 h-6 text-green-600" /></div><h3 className="text-lg font-bold text-slate-800">User Access Control</h3></div><button onClick={() => setIsAddUserModalOpen(true)} className="flex items-center gap-1 text-sm text-blue-600 font-bold uppercase tracking-wider hover:bg-blue-50 px-3 py-2 rounded-lg transition-colors"><Plus size={16} /> Add User</button></div><table className="w-full text-left text-sm text-slate-600"><thead className="bg-slate-50/50 border-b border-slate-100"><tr><th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">User</th><th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Email</th><th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Role</th><th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider text-right">Actions</th></tr></thead><tbody className="divide-y divide-slate-50">{users.map(user => (<tr key={user.id} className="hover:bg-slate-50/50 transition-colors"><td className="px-6 py-4 font-medium text-slate-900 flex items-center gap-2"><div className="w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 font-bold border border-slate-300"><User size={14} /></div>{user.firstName} {user.lastName}</td><td className="px-6 py-4">{user.email}</td><td className="px-6 py-4"><span className={`px-2 py-1 rounded text-xs font-bold uppercase tracking-wider ${user.role === 'Admin' ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700'}`}>{user.role}</span></td><td className="px-6 py-4 flex justify-end gap-2"><button onClick={() => setEditingUser(user)} className="p-2 text-slate-400 hover:bg-white hover:shadow-sm hover:text-slate-800 rounded-lg transition-all border border-transparent hover:border-slate-100"><Edit2 size={16} /></button><button onClick={() => setUserToDelete(user)} className="p-2 text-slate-400 hover:bg-red-50 hover:text-red-500 rounded-lg transition-colors"><Trash2 size={16} /></button></td></tr>))}</tbody></table></div><div className="bg-white shadow-sm rounded-2xl border border-slate-100 overflow-hidden"><div className="p-6 bg-red-50/30 border-b border-red-50 flex items-center gap-3"><div className="p-2 bg-red-100 rounded-xl text-red-600"><AlertTriangle size={20}/></div><h3 className="text-lg font-bold text-slate-800">Danger Zone</h3></div><div className="p-6 flex items-center justify-between"><div><p className="text-sm font-bold text-slate-700">Reset Application Data</p><p className="text-xs text-slate-500 mt-1">This will restore the original billboard inventory and clear all current rentals.</p></div><button onClick={() => setIsResetConfirmOpen(true)} className="px-4 py-2 bg-red-100 text-red-600 hover:bg-red-200 rounded-lg text-xs font-bold uppercase tracking-wider transition-colors">Reset Data</button></div></div></div><div className="space-y-6"><div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100"><h3 className="text-lg font-bold text-slate-800 mb-6">Branding & Identity</h3><div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-slate-200 rounded-2xl mb-6 bg-slate-50/50 hover:bg-slate-50 transition-colors"><div className="text-center relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}><div className="w-24 h-24 bg-white rounded-full mx-auto mb-4 flex items-center justify-center overflow-hidden shadow-md border-4 border-white group-hover:scale-105 transition-transform"><img src={logoPreview} alt="Logo" className="w-full h-full object-cover"/></div><div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><div className="bg-black/50 text-white text-xs font-bold px-2 py-1 rounded">Change</div></div><p className="text-sm font-medium text-slate-600">Company Logo</p><p className="text-xs text-slate-400 mt-1">Click to Upload</p><input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleLogoUpload}/></div></div><button onClick={() => fileInputRef.current?.click()} className="w-full py-3 border border-slate-200 rounded-xl text-xs font-bold uppercase tracking-wider text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-center gap-2"><Upload size={14}/> Upload New Logo</button></div><div className="bg-gradient-to-br from-blue-900 to-slate-900 p-6 rounded-2xl shadow-lg text-white relative overflow-hidden group"><div className="relative z-10"><h3 className="text-lg font-bold mb-2 flex items-center gap-2"><Cloud size={18}/> System Status</h3><div className="flex items-center gap-2 mb-6"><div className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse shadow-[0_0_10px_rgba(74,222,128,0.5)]"></div><span className="text-blue-100 text-sm font-medium">Systems Operational</span></div><div className="space-y-2 text-xs text-blue-200/80 border-t border-white/10 pt-4 font-mono"><p>Version: <span className="text-white">1.1.0</span></p><p>Build: <span className="text-white">Production-Stable</span></p><p>Last Update: {new Date().toLocaleDateString()}</p></div></div><div className="absolute -bottom-12 -right-12 w-48 h-48 bg-blue-500 rounded-full blur-3xl opacity-20 group-hover:opacity-30 transition-opacity"></div><div className="absolute top-0 right-0 w-32 h-32 bg-purple-500 rounded-full blur-3xl opacity-10"></div></div></div></div>
         )}
-        
         {activeTab === 'Audit' && (
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-fade-in">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30">
-                  <div className="flex items-center gap-3">
-                      <div className="p-2 bg-slate-100 rounded-xl text-slate-600"><ScrollText size={20}/></div>
-                      <div>
-                          <h3 className="text-lg font-bold text-slate-800">Admin Audit Logs</h3>
-                          <p className="text-xs text-slate-500 font-medium">Track system-wide events and security actions</p>
-                      </div>
-                  </div>
-                  <button 
-                      onClick={handleExportAuditLogs}
-                      className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 px-4 py-2.5 rounded-xl transition-all shadow-sm"
-                  >
-                      <Download size={14}/> Export CSV
-                  </button>
-                </div>
-                <table className="w-full text-left text-sm text-slate-600">
-                    <thead className="bg-slate-50/50 border-b border-slate-100">
-                        <tr>
-                            <th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Timestamp</th>
-                            <th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">User</th>
-                            <th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Action</th>
-                            <th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-50">
-                        {auditLogs.map(log => (
-                            <tr key={log.id} className="hover:bg-slate-50 transition-colors">
-                                <td className="px-6 py-4 font-mono text-xs text-slate-500">{log.timestamp}</td>
-                                <td className="px-6 py-4 font-bold text-slate-800">{log.user}</td>
-                                <td className="px-6 py-4">
-                                    <span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wide border border-slate-200">{log.action}</span>
-                                </td>
-                                <td className="px-6 py-4 text-slate-600">{log.details}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden animate-fade-in"><div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/30"><div className="flex items-center gap-3"><div className="p-2 bg-slate-100 rounded-xl text-slate-600"><ScrollText size={20}/></div><div><h3 className="text-lg font-bold text-slate-800">Admin Audit Logs</h3><p className="text-xs text-slate-500 font-medium">Track system-wide events and security actions</p></div></div><button onClick={handleExportAuditLogs} className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 hover:border-slate-300 px-4 py-2.5 rounded-xl transition-all shadow-sm"><Download size={14}/> Export CSV</button></div><table className="w-full text-left text-sm text-slate-600"><thead className="bg-slate-50/50 border-b border-slate-100"><tr><th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Timestamp</th><th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">User</th><th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Action</th><th className="px-6 py-4 font-bold text-xs uppercase text-slate-400 tracking-wider">Details</th></tr></thead><tbody className="divide-y divide-slate-50">{auditLogs.map(log => (<tr key={log.id} className="hover:bg-slate-50 transition-colors"><td className="px-6 py-4 font-mono text-xs text-slate-500">{log.timestamp}</td><td className="px-6 py-4 font-bold text-slate-800">{log.user}</td><td className="px-6 py-4"><span className="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 text-[10px] font-bold uppercase tracking-wide border border-slate-200">{log.action}</span></td><td className="px-6 py-4 text-slate-600">{log.details}</td></tr>))}</tbody></table></div>
         )}
-
-        {activeTab === 'ReleaseNotes' && (
-            <div className="max-w-4xl mx-auto animate-fade-in space-y-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600">
-                      <History size={24} />
-                  </div>
-                  <div>
-                      <h3 className="text-2xl font-bold text-slate-800">Release Notes</h3>
-                      <p className="text-slate-500">System updates and changelog history</p>
-                  </div>
-                </div>
-
-                <div className="relative border-l-2 border-slate-200 ml-3 space-y-12 pb-12">
-                    {RELEASE_NOTES.map((release, idx) => (
-                        <div key={idx} className="relative pl-8">
-                            {/* Timeline Dot */}
-                            <div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white shadow-sm ${idx === 0 ? 'bg-indigo-600' : 'bg-slate-300'}`}></div>
-                            
-                            <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow">
-                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-                                    <div>
-                                        <div className="flex items-center gap-3 mb-1">
-                                            <span className="text-lg font-bold text-slate-900">v{release.version}</span>
-                                            {idx === 0 && <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase rounded-full tracking-wider">Latest</span>}
-                                        </div>
-                                        <h4 className="text-slate-700 font-medium">{release.title}</h4>
-                                    </div>
-                                    <span className="text-sm font-mono text-slate-400 bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">{release.date}</span>
-                                </div>
-                                
-                                <ul className="space-y-3">
-                                    {release.features.map((feature, fIdx) => (
-                                        <li key={fIdx} className="flex items-start gap-3 text-sm text-slate-600">
-                                            <div className="mt-1 w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></div>
-                                            {feature}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        )}
+        {activeTab === 'ReleaseNotes' && (<div className="max-w-4xl mx-auto animate-fade-in space-y-8"><div className="flex items-center gap-4 mb-6"><div className="p-3 bg-indigo-50 rounded-2xl text-indigo-600"><History size={24} /></div><div><h3 className="text-2xl font-bold text-slate-800">Release Notes</h3><p className="text-slate-500">System updates and changelog history</p></div></div><div className="relative border-l-2 border-slate-200 ml-3 space-y-12 pb-12">{RELEASE_NOTES.map((release, idx) => (<div key={idx} className="relative pl-8"><div className={`absolute -left-[9px] top-0 w-4 h-4 rounded-full border-2 border-white shadow-sm ${idx === 0 ? 'bg-indigo-600' : 'bg-slate-300'}`}></div><div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-md transition-shadow"><div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4"><div><div className="flex items-center gap-3 mb-1"><span className="text-lg font-bold text-slate-900">v{release.version}</span>{idx === 0 && <span className="px-2 py-0.5 bg-indigo-100 text-indigo-700 text-[10px] font-bold uppercase rounded-full tracking-wider">Latest</span>}</div><h4 className="text-slate-700 font-medium">{release.title}</h4></div><span className="text-sm font-mono text-slate-400 bg-slate-50 px-3 py-1 rounded-lg border border-slate-100">{release.date}</span></div><ul className="space-y-3">{release.features.map((feature, fIdx) => (<li key={fIdx} className="flex items-start gap-3 text-sm text-slate-600"><div className="mt-1 w-1.5 h-1.5 rounded-full bg-green-500 shrink-0"></div>{feature}</li>))}</ul></div></div>))}</div></div>)}
       </div>
-
-      {/* Add User Modal */}
-      {isAddUserModalOpen && (
-          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all">
-            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-lg w-full border border-white/20 transform scale-100 animate-fade-in">
-              <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-                <h3 className="text-xl font-bold text-slate-900">Add New User</h3>
-                <button onClick={() => setIsAddUserModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button>
-              </div>
-              
-              <form onSubmit={handleAddUser} className="p-8 space-y-6">
-                <div className="grid grid-cols-2 gap-6">
-                    <MinimalInput label="First Name" value={newUser.firstName} onChange={(e: any) => setNewUser({...newUser, firstName: e.target.value})} required />
-                    <MinimalInput label="Last Name" value={newUser.lastName} onChange={(e: any) => setNewUser({...newUser, lastName: e.target.value})} required />
-                </div>
-                <MinimalInput label="Email Address" type="email" value={newUser.email} onChange={(e: any) => setNewUser({...newUser, email: e.target.value})} required />
-                <MinimalSelect 
-                    label="Role" 
-                    value={newUser.role} 
-                    onChange={(e: any) => setNewUser({...newUser, role: e.target.value})} 
-                    options={[
-                        {value: 'Admin', label: 'Admin (Full Access)'},
-                        {value: 'Manager', label: 'Manager (No Settings)'},
-                        {value: 'Staff', label: 'Staff (Read Only)'}
-                    ]}
-                />
-
-                <button type="submit" className="w-full py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all">
-                  <Save size={18} /> Create User Account
-                </button>
-              </form>
-            </div>
-          </div>
-      )}
-
-      {/* Edit User Modal */}
-      {editingUser && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-lg w-full border border-white/20">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-slate-900">Edit User Role</h3>
-              <button onClick={() => setEditingUser(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button>
-            </div>
-            
-            <form onSubmit={handleEditUser} className="p-8 space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                  <MinimalInput label="First Name" value={editingUser.firstName} onChange={(e: any) => setEditingUser({...editingUser, firstName: e.target.value})} required />
-                  <MinimalInput label="Last Name" value={editingUser.lastName} onChange={(e: any) => setEditingUser({...editingUser, lastName: e.target.value})} required />
-              </div>
-              <MinimalInput label="Email Address" type="email" value={editingUser.email} onChange={(e: any) => setEditingUser({...editingUser, email: e.target.value})} required />
-              <MinimalSelect 
-                  label="Role" 
-                  value={editingUser.role} 
-                  onChange={(e: any) => setEditingUser({...editingUser, role: e.target.value as any})} 
-                  options={[
-                      {value: 'Admin', label: 'Admin (Full Access)'},
-                      {value: 'Manager', label: 'Manager (No Settings)'},
-                      {value: 'Staff', label: 'Staff (Read Only)'}
-                  ]}
-              />
-
-              <button type="submit" className="w-full py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all">
-                <Save size={18} /> Update User
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* Delete User Confirmation Modal */}
-      {userToDelete && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all">
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-sm w-full border border-white/20 p-6 text-center">
-             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50">
-                <AlertTriangle className="text-red-500" size={32} />
-             </div>
-             <h3 className="text-xl font-bold text-slate-900 mb-2">Delete User?</h3>
-             <p className="text-slate-500 mb-6 text-sm">
-               Are you sure you want to delete <span className="font-bold text-slate-700">{userToDelete.firstName} {userToDelete.lastName}</span>? This action cannot be undone.
-             </p>
-             <div className="flex gap-3">
-               <button 
-                  onClick={() => setUserToDelete(null)}
-                  className="flex-1 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors"
-                >
-                  Cancel
-               </button>
-               <button 
-                  onClick={handleConfirmDelete}
-                  className="flex-1 py-3 text-white bg-red-500 hover:bg-red-600 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors shadow-lg shadow-red-500/30"
-                >
-                  Delete
-               </button>
-             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Reset System Confirmation Modal */}
-      {isResetConfirmOpen && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all">
-          <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border border-white/20 p-8 text-center animate-fade-in">
-             <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-red-50 animate-pulse">
-                <RefreshCw className="text-red-500" size={40} />
-             </div>
-             <h3 className="text-2xl font-bold text-slate-900 mb-2">Reset All Data?</h3>
-             <p className="text-slate-600 mb-8 leading-relaxed">
-               This will <span className="font-bold text-red-600">permanently delete</span> all current rentals, clients, and financial records, and restore the default billboard inventory. 
-               <br/><br/>
-               You will be logged out immediately.
-             </p>
-             <div className="flex flex-col gap-3">
-               <button 
-                  onClick={resetSystemData}
-                  className="w-full py-4 text-white bg-red-600 hover:bg-red-700 rounded-xl font-bold uppercase tracking-wider transition-colors shadow-lg shadow-red-500/30"
-                >
-                  Yes, Reset Everything
-               </button>
-               <button 
-                  onClick={() => setIsResetConfirmOpen(false)}
-                  className="w-full py-4 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold uppercase tracking-wider transition-colors"
-                >
-                  Cancel
-               </button>
-             </div>
-          </div>
-        </div>
-      )}
+      {isAddUserModalOpen && (<div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all"><div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-lg w-full border border-white/20 transform scale-100 animate-fade-in"><div className="p-6 border-b border-slate-100 flex justify-between items-center"><h3 className="text-xl font-bold text-slate-900">Add New User</h3><button onClick={() => setIsAddUserModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button></div><form onSubmit={handleAddUser} className="p-8 space-y-6"><div className="grid grid-cols-2 gap-6"><MinimalInput label="First Name" value={newUser.firstName} onChange={(e: any) => setNewUser({...newUser, firstName: e.target.value})} required /><MinimalInput label="Last Name" value={newUser.lastName} onChange={(e: any) => setNewUser({...newUser, lastName: e.target.value})} required /></div><MinimalInput label="Email Address" type="email" value={newUser.email} onChange={(e: any) => setNewUser({...newUser, email: e.target.value})} required /><MinimalSelect label="Role" value={newUser.role} onChange={(e: any) => setNewUser({...newUser, role: e.target.value})} options={[{value: 'Admin', label: 'Admin (Full Access)'},{value: 'Manager', label: 'Manager (No Settings)'},{value: 'Staff', label: 'Staff (Read Only)'}]} /><button type="submit" className="w-full py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all"><Save size={18} /> Create User Account</button></form></div></div>)}
+      {editingUser && (<div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all"><div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-lg w-full border border-white/20"><div className="p-6 border-b border-slate-100 flex justify-between items-center"><h3 className="text-xl font-bold text-slate-900">Edit User Role</h3><button onClick={() => setEditingUser(null)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button></div><form onSubmit={handleEditUser} className="p-8 space-y-6"><div className="grid grid-cols-2 gap-6"><MinimalInput label="First Name" value={editingUser.firstName} onChange={(e: any) => setEditingUser({...editingUser, firstName: e.target.value})} required /><MinimalInput label="Last Name" value={editingUser.lastName} onChange={(e: any) => setEditingUser({...editingUser, lastName: e.target.value})} required /></div><MinimalInput label="Email Address" type="email" value={editingUser.email} onChange={(e: any) => setEditingUser({...editingUser, email: e.target.value})} required /><MinimalSelect label="Role" value={editingUser.role} onChange={(e: any) => setEditingUser({...editingUser, role: e.target.value as any})} options={[{value: 'Admin', label: 'Admin (Full Access)'},{value: 'Manager', label: 'Manager (No Settings)'},{value: 'Staff', label: 'Staff (Read Only)'}]} /><button type="submit" className="w-full py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all"><Save size={18} /> Update User</button></form></div></div>)}
+      {userToDelete && (<div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all"><div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-sm w-full border border-white/20 p-6 text-center"><div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50"><AlertTriangle className="text-red-500" size={32} /></div><h3 className="text-xl font-bold text-slate-900 mb-2">Delete User?</h3><p className="text-slate-500 mb-6 text-sm">Are you sure you want to delete <span className="font-bold text-slate-700">{userToDelete.firstName} {userToDelete.lastName}</span>? This action cannot be undone.</p><div className="flex gap-3"><button onClick={() => setUserToDelete(null)} className="flex-1 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors">Cancel</button><button onClick={handleConfirmDelete} className="flex-1 py-3 text-white bg-red-500 hover:bg-red-600 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors shadow-lg shadow-red-500/30">Delete</button></div></div></div>)}
+      {isResetConfirmOpen && (<div className="fixed inset-0 bg-slate-900/80 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all"><div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border border-white/20 p-8 text-center animate-fade-in"><div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6 border-4 border-red-50 animate-pulse"><RefreshCw className="text-red-500" size={40} /></div><h3 className="text-2xl font-bold text-slate-900 mb-2">Reset All Data?</h3><p className="text-slate-600 mb-8 leading-relaxed">This will <span className="font-bold text-red-600">permanently delete</span> all current rentals, clients, and financial records, and restore the default billboard inventory.<br/><br/>You will be logged out immediately.</p><div className="flex flex-col gap-3"><button onClick={resetSystemData} className="w-full py-4 text-white bg-red-600 hover:bg-red-700 rounded-xl font-bold uppercase tracking-wider transition-colors shadow-lg shadow-red-500/30">Yes, Reset Everything</button><button onClick={() => setIsResetConfirmOpen(false)} className="w-full py-4 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold uppercase tracking-wider transition-colors">Cancel</button></div></div></div>)}
     </>
   );
 };

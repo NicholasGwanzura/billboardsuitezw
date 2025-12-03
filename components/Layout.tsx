@@ -1,10 +1,12 @@
 
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Map, Users, FileText, CreditCard, Receipt, Settings as SettingsIcon,
   Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, Radio
 } from 'lucide-react';
 import { getCurrentUser, logout } from '../services/authService';
+import { getSystemAlertCount } from '../services/mockData';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,7 +17,20 @@ interface LayoutProps {
 
 export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate, onLogout }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [alertCount, setAlertCount] = useState(0);
   const user = getCurrentUser();
+
+  useEffect(() => {
+    // Initial fetch
+    setAlertCount(getSystemAlertCount());
+    
+    // Set up polling interval to check for updates every 10 seconds
+    const interval = setInterval(() => {
+        setAlertCount(getSystemAlertCount());
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [currentPage]); // Also update when changing pages
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -103,7 +118,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
            {/* Deployment Version Indicator */}
            <div className="flex items-center justify-between text-[10px] text-slate-500 bg-slate-800/50 py-1.5 px-3 rounded-full border border-slate-800">
               <span className="flex items-center gap-1.5"><Radio size={10} className="text-green-500 animate-pulse"/> Live System</span>
-              <span className="font-mono">v1.1.0</span>
+              <span className="font-mono">v1.3.0</span>
            </div>
         </div>
       </aside>
@@ -122,9 +137,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
           </div>
           
           <div className="flex items-center gap-4">
-             <button className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors">
+             <button onClick={() => onNavigate('dashboard')} className="relative p-2 text-slate-500 hover:bg-slate-100 rounded-full transition-colors" title={`${alertCount} System Alerts`}>
                 <Bell size={20} />
-                <span className="absolute top-1.5 right-2 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                {alertCount > 0 && (
+                    <span className="absolute top-1 right-1 w-4 h-4 bg-red-500 rounded-full border border-white flex items-center justify-center text-[9px] font-bold text-white">
+                        {alertCount > 9 ? '9+' : alertCount}
+                    </span>
+                )}
              </button>
           </div>
         </header>

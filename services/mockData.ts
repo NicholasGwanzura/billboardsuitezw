@@ -211,6 +211,18 @@ let companyLogo = loadFromStorage(STORAGE_KEYS.LOGO, 'https://via.placeholder.co
 
 export const RELEASE_NOTES = [
     {
+        version: '1.3.0',
+        date: 'Jan 2026',
+        title: 'Payment & Scheduling Update',
+        features: [
+            'Added Payment Schedule view for cashflow forecasting',
+            'Implemented "Next Billing" indicators on Client Profiles',
+            'Added Dashboard Widget for Upcoming Collections',
+            'Real-time Notification Counter in Header',
+            'Production Data Mode (Persistence Enabled)'
+        ]
+    },
+    {
         version: '1.2.0',
         date: 'Jan 2026',
         title: 'Production Ready Update',
@@ -285,6 +297,65 @@ export const getTransactions = (clientId: string) => {
         .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 };
 
+// --- Billing Schedule Helpers ---
+export const getNextBillingDetails = (clientId: string) => {
+    const activeContracts = contracts.filter(c => c.clientId === clientId && c.status === 'Active');
+    if (activeContracts.length === 0) return null;
+
+    const today = new Date();
+    let earliestDate: Date | null = null;
+    let totalAmount = 0;
+    const billDays = new Set<number>();
+
+    activeContracts.forEach(c => {
+        const start = new Date(c.startDate);
+        const day = start.getDate();
+        billDays.add(day);
+        
+        // Calculate next occurrence of 'day'
+        let targetDate = new Date(today.getFullYear(), today.getMonth(), day);
+        if (targetDate <= today) {
+            targetDate = new Date(today.getFullYear(), today.getMonth() + 1, day);
+        }
+
+        if (!earliestDate || targetDate < earliestDate) {
+            earliestDate = targetDate;
+        }
+        totalAmount += c.monthlyRate;
+    });
+
+    return {
+        date: earliestDate ? earliestDate.toLocaleDateString() : 'N/A',
+        amount: totalAmount,
+        days: Array.from(billDays).sort((a,b) => a-b)
+    };
+};
+
+export const getUpcomingBillings = () => {
+    const results: { clientName: string; date: string; amount: number; day: string }[] = [];
+    clients.forEach(client => {
+        const details = getNextBillingDetails(client.id);
+        if (details && details.date !== 'N/A') {
+            const formattedDays = details.days.map(d => {
+                const j = d % 10, k = d % 100;
+                if (j === 1 && k !== 11) return d + "st";
+                if (j === 2 && k !== 12) return d + "nd";
+                if (j === 3 && k !== 13) return d + "rd";
+                return d + "th";
+            }).join(', ');
+
+            results.push({
+                clientName: client.companyName,
+                date: details.date,
+                amount: details.amount,
+                day: formattedDays
+            });
+        }
+    });
+    // Sort by date soonest
+    return results.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+};
+
 // Notification Helpers
 export const getExpiringContracts = () => {
     const today = new Date();
@@ -299,6 +370,10 @@ export const getExpiringContracts = () => {
 
 export const getOverdueInvoices = () => {
     return invoices.filter(i => i.status === 'Pending' || i.status === 'Overdue');
+};
+
+export const getSystemAlertCount = () => {
+    return getExpiringContracts().length + getOverdueInvoices().length;
 };
 
 export const logAction = (action: string, details: string) => {

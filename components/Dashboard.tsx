@@ -4,8 +4,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   BarChart, Bar, Cell, PieChart, Pie, Legend
 } from 'recharts';
-import { DollarSign, FileText, Activity, Users, Sparkles, TrendingUp, TrendingDown, Bell, AlertTriangle, Clock } from 'lucide-react';
-import { getContracts, getInvoices, getBillboards, getClients, getExpiringContracts, getOverdueInvoices } from '../services/mockData';
+import { DollarSign, FileText, Activity, Users, Sparkles, TrendingUp, TrendingDown, Bell, AlertTriangle, Clock, Calendar } from 'lucide-react';
+import { getContracts, getInvoices, getBillboards, getClients, getExpiringContracts, getOverdueInvoices, getUpcomingBillings } from '../services/mockData';
 import { BillboardType } from '../types';
 import { analyzeBusinessData } from '../services/aiService';
 
@@ -22,6 +22,8 @@ export const Dashboard: React.FC = () => {
   // Notification Data
   const expiringContracts = getExpiringContracts();
   const overdueInvoices = getOverdueInvoices();
+  // Get only first 3 upcoming
+  const upcomingBillings = getUpcomingBillings().slice(0, 3);
 
   const totalRevenue = invoices.filter(i => i.type === 'Invoice').reduce((acc, curr) => acc + curr.total, 0);
   const activeContracts = contracts.filter(c => c.status === 'Active').length;
@@ -102,7 +104,7 @@ export const Dashboard: React.FC = () => {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h2 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 mb-2">Executive Dashboard</h2>
-              <p className="text-slate-500 font-medium">Real-time business performance & strategic metrics</p>
+              <p className="text-slate-500 font-medium">Real-time business metrics & strategic performance</p>
             </div>
             <button 
               onClick={handleAskAI}
@@ -264,6 +266,29 @@ export const Dashboard: React.FC = () => {
              </div>
              
              <div className="space-y-4">
+                 {/* Upcoming Collections Widget */}
+                 {upcomingBillings.length > 0 && (
+                     <div className="mb-6 pb-6 border-b border-slate-50">
+                        <div className="flex items-center gap-2 mb-3">
+                            <Calendar size={14} className="text-indigo-500" />
+                            <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wide">Upcoming Collections</h4>
+                        </div>
+                        <div className="space-y-3">
+                            {upcomingBillings.map((bill, i) => (
+                                <div key={i} className="flex justify-between items-center p-3 bg-indigo-50/50 rounded-xl border border-indigo-50">
+                                    <div className="min-w-0">
+                                        <p className="text-xs font-bold text-slate-800 truncate">{bill.clientName}</p>
+                                        <p className="text-[10px] text-slate-500">Due: {bill.date}</p>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="text-xs font-bold text-indigo-700">${bill.amount.toLocaleString()}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                     </div>
+                 )}
+
                  {/* Expiring Contracts */}
                  {expiringContracts.length > 0 ? (
                     expiringContracts.map(c => (
