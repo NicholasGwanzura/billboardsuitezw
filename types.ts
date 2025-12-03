@@ -1,4 +1,5 @@
 
+
 export enum BillboardType {
   Static = 'Static',
   LED = 'LED'
@@ -139,6 +140,19 @@ export interface AuditLogEntry {
   action: string;
   details: string;
   user: string;
+}
+
+export interface CompanyProfile {
+    name: string;
+    vatNumber: string;
+    regNumber: string;
+    email: string;
+    supportEmail: string;
+    phone: string;
+    website: string;
+    address: string;
+    city: string;
+    country: string;
 }
 
 export const VAT_RATE = 0.15;

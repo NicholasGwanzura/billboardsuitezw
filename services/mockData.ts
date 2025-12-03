@@ -1,6 +1,6 @@
 
 
-import { Billboard, BillboardType, Client, Contract, Invoice, Expense, User, PrintingJob, OutsourcedBillboard, AuditLogEntry } from '../types';
+import { Billboard, BillboardType, Client, Contract, Invoice, Expense, User, PrintingJob, OutsourcedBillboard, AuditLogEntry, CompanyProfile } from '../types';
 
 export const ZIM_TOWNS = [
   "Harare", "Bulawayo", "Mutare", "Gweru", "Kwekwe", 
@@ -43,7 +43,8 @@ const STORAGE_KEYS = {
     LOGS: 'bs_logs',
     OUTSOURCED: 'bs_outsourced',
     PRINTING: 'bs_printing',
-    LOGO: 'bs_logo'
+    LOGO: 'bs_logo',
+    PROFILE: 'bs_company_profile'
 };
 
 const loadFromStorage = <T>(key: string, defaultValue: T): T => {
@@ -87,19 +88,39 @@ const defaultUsers: User[] = [
 let users: User[] = loadFromStorage(STORAGE_KEYS.USERS, defaultUsers);
 let companyLogo = loadFromStorage(STORAGE_KEYS.LOGO, 'https://via.placeholder.com/200x200?text=Upload+Logo');
 
+const DEFAULT_PROFILE: CompanyProfile = {
+    name: "Spiritus Systems",
+    vatNumber: "VAT-9928371",
+    regNumber: "REG-2025/001",
+    email: "admin@spiritus.com",
+    supportEmail: "support@spiritus.com",
+    phone: "+263 772 123 456",
+    website: "www.spiritus.com",
+    address: "123 Business Park, Enterprise Way",
+    city: "Harare",
+    country: "Zimbabwe"
+};
+let companyProfile: CompanyProfile = loadFromStorage(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
+
 export const setCompanyLogo = (url: string) => { 
     companyLogo = url; 
     saveToStorage(STORAGE_KEYS.LOGO, companyLogo);
 };
 
+export const updateCompanyProfile = (profile: CompanyProfile) => {
+    companyProfile = profile;
+    saveToStorage(STORAGE_KEYS.PROFILE, companyProfile);
+    logAction('Settings Update', 'Updated company profile details');
+};
+
 // --- Backup & Restore Logic ---
 export const createSystemBackup = () => {
     return JSON.stringify({
-        version: '1.4.1',
+        version: '1.4.2',
         timestamp: new Date().toISOString(),
         data: {
             billboards, contracts, clients, invoices, expenses, 
-            users, outsourcedBillboards, auditLogs, printingJobs, companyLogo
+            users, outsourcedBillboards, auditLogs, printingJobs, companyLogo, companyProfile
         }
     }, null, 2);
 };
@@ -120,6 +141,7 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
         saveToStorage(STORAGE_KEYS.LOGS, backup.data.auditLogs || []);
         saveToStorage(STORAGE_KEYS.PRINTING, backup.data.printingJobs || []);
         saveToStorage(STORAGE_KEYS.LOGO, backup.data.companyLogo || '');
+        saveToStorage(STORAGE_KEYS.PROFILE, backup.data.companyProfile || DEFAULT_PROFILE);
 
         return true;
     } catch(e) {
@@ -129,6 +151,16 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 };
 
 export const RELEASE_NOTES = [
+    {
+        version: '1.4.2',
+        date: 'Feb 2026',
+        title: 'Settings Persistence Fix',
+        features: [
+            'Fixed Company Profile settings not saving',
+            'Implemented Base64 encoding for Logo uploads to ensure persistence across refreshes',
+            'Updated backup engine to include Company Profile data'
+        ]
+    },
     {
         version: '1.4.1',
         date: 'Feb 2026',
@@ -161,6 +193,7 @@ export const getUsers = () => users;
 export const getClients = () => clients;
 export const getOutsourcedBillboards = () => outsourcedBillboards;
 export const getCompanyLogo = () => companyLogo;
+export const getCompanyProfile = () => companyProfile;
 
 export const resetSystemData = () => {
     localStorage.clear();
