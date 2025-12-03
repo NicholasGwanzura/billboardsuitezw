@@ -7,41 +7,186 @@ export const ZIM_TOWNS = [
   "Masvingo", "Chinhoyi", "Marondera", "Kadoma", "Victoria Falls", "Beitbridge", "Zvishavane", "Bindura", "Chitungwiza"
 ];
 
-// FULL 22-ITEM INVENTORY (21 Static + 1 LED)
+// FULL 23-ITEM INVENTORY FROM DREAMBOX 2025 CATALOGUE
 const INITIAL_BILLBOARDS: Billboard[] = [
-  // Harare (5)
-  { id: "1", name: "Airport Rd H-Frame", location: "Airport Rd", town: "Harare", type: BillboardType.Static, width: 12, height: 4, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.892, lng: 31.105 }, imageUrl: "https://images.unsplash.com/photo-1622675363311-ac97f3a9a6c1?auto=format&fit=crop&q=80&w=800", visibility: "High-traffic route to Airport." },
-  { id: "2", name: "Airport & George Rd", location: "Airport & George Rd", town: "Harare", type: BillboardType.Static, width: 6, height: 7, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.885, lng: 31.098 }, imageUrl: "https://images.unsplash.com/photo-1562512684-25cb974cb30b?auto=format&fit=crop&q=80&w=800", visibility: "Key intersection for industrial traffic." },
-  { id: "3", name: "Samora Machel Spectacular", location: "Samora Machel Ave West", town: "Harare", type: BillboardType.Static, width: 18, height: 6, sideARate: 1200, sideBRate: 1200, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.828, lng: 31.035 }, imageUrl: "https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&q=80&w=800", visibility: "Prime CBD entry route." },
-  { id: "4", name: "Simon Mazorodze Overhead", location: "Simon Mazorodze Rd", town: "Harare", type: BillboardType.Static, width: 12, height: 3, sideARate: 800, sideBRate: 800, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.855, lng: 31.040 }, imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800", visibility: "Heavy industrial and commuter traffic." },
-  { id: "5", name: "Borrowdale Racecourse", location: "Borrowdale Rd", town: "Harare", type: BillboardType.Static, width: 9, height: 6, sideARate: 950, sideBRate: 950, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.775, lng: 31.085 }, imageUrl: "https://images.unsplash.com/photo-1552084117-5635e80c8dd0?auto=format&fit=crop&q=80&w=800", visibility: "Affluent demographic target." },
-  
-  // Bulawayo (3)
-  { id: "6", name: "Jason Moyo Center", location: "Jason Moyo St", town: "Bulawayo", type: BillboardType.Static, width: 6, height: 3, sideARate: 400, sideBRate: 400, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.155, lng: 28.580 }, imageUrl: "https://images.unsplash.com/photo-1585155967849-91c73652e4d9?auto=format&fit=crop&q=80&w=800", visibility: "Bulawayo CBD heart." },
-  { id: "7", name: "Robert Mugabe Way", location: "Robert Mugabe Way", town: "Bulawayo", type: BillboardType.Static, width: 12, height: 4, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.160, lng: 28.585 }, imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=800", visibility: "Main arterial route." },
-  { id: "8", name: "Ascot Shopping Ctr", location: "Ascot", town: "Bulawayo", type: BillboardType.Static, width: 4, height: 8, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.145, lng: 28.600 }, imageUrl: "https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?auto=format&fit=crop&q=80&w=800", visibility: "Near shopping center." },
+  // Page 3
+  { 
+    id: "1", name: "Airport Rd H-Frame", location: "Airport Rd", town: "Harare", type: BillboardType.Static, 
+    width: 12, height: 4, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.892, lng: 31.105 }, 
+    imageUrl: "https://images.unsplash.com/photo-1617195920950-1145bf9a9c72?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Travel like a Pro. High airport traffic." 
+  },
+  { 
+    id: "2", name: "Airport Rd & George Rd", location: "Airport Rd & George Rd Intersection", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.885, lng: 31.098 }, 
+    imageUrl: "https://images.unsplash.com/photo-1562512684-25cb974cb30b?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Prime intersection visibility." 
+  },
+  { 
+    id: "3", name: "S. Mazorodze Rd (Eva)", location: "S. Mazorodze Rd", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.855, lng: 31.040 }, 
+    imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Near Ardbennie. High density traffic." 
+  },
 
-  // Mutare (2)
-  { id: "9", name: "Christmas Pass", location: "Harare-Mutare Hwy", town: "Mutare", type: BillboardType.Static, width: 12, height: 4, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.950, lng: 32.630 }, imageUrl: "https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?auto=format&fit=crop&q=80&w=800", visibility: "Scenic entry to Mutare." },
-  { id: "10", name: "Herbert Chitepo St", location: "CBD", town: "Mutare", type: BillboardType.Static, width: 6, height: 3, sideARate: 350, sideBRate: 350, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.970, lng: 32.670 }, imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800", visibility: "City center traffic." },
+  // Page 4
+  { 
+    id: "4", name: "S. Mazorodze (Willowvale)", location: "Near Willowvale Rd", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.865, lng: 31.035 }, 
+    imageUrl: "https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Industrial area access route." 
+  },
+  { 
+    id: "5", name: "Kirkman Rd Tynwald", location: "Kirkman Rd Tynwald", town: "Harare", type: BillboardType.Static, 
+    width: 12, height: 4, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.795, lng: 30.985 }, 
+    imageUrl: "https://images.unsplash.com/photo-1622675363311-ac97f3a9a6c1?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Busy commuter route (LiuGong location)." 
+  },
+  { 
+    id: "6", name: "Bindura Tollgate", location: "Bindura Tollgate", town: "Bindura", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.720, lng: 31.150 }, 
+    imageUrl: "https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Main highway tollgate visibility." 
+  },
 
-  // Gweru (2)
-  { id: "11", name: "Gweru Flyover", location: "Gweru Main Flyover", town: "Gweru", type: BillboardType.Static, width: 10, height: 4, sideARate: 400, sideBRate: 400, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -19.450, lng: 29.820 }, imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=800", visibility: "High visibility on flyover." },
-  { id: "12", name: "Main Street Gweru", location: "Main St", town: "Gweru", type: BillboardType.Static, width: 6, height: 3, sideARate: 300, sideBRate: 300, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -19.458, lng: 29.815 }, imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=800", visibility: "Pedestrian heavy." },
+  // Page 5
+  { 
+    id: "7", name: "R. Mugabe Rd", location: "Near Gelnara Ave", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.815, lng: 31.085 }, 
+    imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=800", 
+    visibility: "High CBD approach traffic." 
+  },
+  { 
+    id: "8", name: "Bulawayo Rd", location: "Near N. Richards Tynwald", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.820, lng: 30.990 }, 
+    imageUrl: "https://images.unsplash.com/photo-1588614959060-4d144f28b207?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Major highway to Bulawayo." 
+  },
+  { 
+    id: "9", name: "Domboshava Rd", location: "Near Winchdon Shops", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.730, lng: 31.130 }, 
+    imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Commuter and peri-urban traffic." 
+  },
 
-  // Others
-  { id: "13", name: "Masvingo Highway", location: "Entry from Harare", town: "Masvingo", type: BillboardType.Static, width: 12, height: 3, sideARate: 400, sideBRate: 400, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.060, lng: 30.820 }, imageUrl: "https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&q=80&w=800", visibility: "Great Zimbabwe tourist route." },
-  { id: "14", name: "Chinhoyi Caves", location: "Caves Turn-off", town: "Chinhoyi", type: BillboardType.Static, width: 9, height: 3, sideARate: 350, sideBRate: 350, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.350, lng: 30.180 }, imageUrl: "https://images.unsplash.com/photo-1523966211575-eb4a63459bf1?auto=format&fit=crop&q=80&w=800", visibility: "Tourist traffic." },
-  { id: "15", name: "Vic Falls Airport Rd", location: "Airport Rd", town: "Victoria Falls", type: BillboardType.Static, width: 10, height: 4, sideARate: 600, sideBRate: 600, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.080, lng: 25.840 }, imageUrl: "https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800", visibility: "International tourist target." },
-  { id: "16", name: "Beitbridge Border", location: "Border Post Entry", town: "Beitbridge", type: BillboardType.Static, width: 12, height: 4, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -22.210, lng: 29.990 }, imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800", visibility: "High cross-border traffic." },
-  { id: "17", name: "Kadoma CBD", location: "City Center", town: "Kadoma", type: BillboardType.Static, width: 6, height: 3, sideARate: 300, sideBRate: 300, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.330, lng: 29.910 }, imageUrl: "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?auto=format&fit=crop&q=80&w=800", visibility: "Gold mining hub." },
-  { id: "18", name: "Marondera Main", location: "Main Rd", town: "Marondera", type: BillboardType.Static, width: 6, height: 3, sideARate: 300, sideBRate: 300, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.190, lng: 31.550 }, imageUrl: "https://images.unsplash.com/photo-1582650625119-3a31f8fa2699?auto=format&fit=crop&q=80&w=800", visibility: "Education hub traffic." },
-  { id: "19", name: "Kwekwe CBD", location: "Main St", town: "Kwekwe", type: BillboardType.Static, width: 6, height: 3, sideARate: 350, sideBRate: 350, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.920, lng: 29.810 }, imageUrl: "https://images.unsplash.com/photo-1596701062351-8c2c14d1fdd0?auto=format&fit=crop&q=80&w=800", visibility: "Industrial center." },
-  { id: "20", name: "Bindura Highway", location: "Trojan Mine Rd", town: "Bindura", type: BillboardType.Static, width: 9, height: 3, sideARate: 300, sideBRate: 300, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.300, lng: 31.330 }, imageUrl: "https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?auto=format&fit=crop&q=80&w=800", visibility: "Mining traffic." },
-  { id: "21", name: "Zvishavane Mine", location: "Mine Rd", town: "Zvishavane", type: BillboardType.Static, width: 6, height: 3, sideARate: 350, sideBRate: 350, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.320, lng: 30.060 }, imageUrl: "https://images.unsplash.com/photo-1565514020176-db8b0059b023?auto=format&fit=crop&q=80&w=800", visibility: "Mining heavy route." },
-  
-  // LED
-  { id: "23", name: "Oldlock LED Digital", location: "Borrowdale", town: "Harare", type: BillboardType.LED, width: 3, height: 2, ratePerSlot: 650, totalSlots: 10, rentedSlots: 0, coordinates: { lat: -17.750, lng: 31.085 }, imageUrl: "https://images.unsplash.com/photo-1588614959060-4d144f28b207?auto=format&fit=crop&q=80&w=800", visibility: "Premium digital screen." }
+  // Page 6
+  { 
+    id: "10", name: "Lomagundi Rd", location: "Harare Drive Intersection", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.760, lng: 31.010 }, 
+    imageUrl: "https://images.unsplash.com/photo-1585155967849-91c73652e4d9?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Key intersection on major arterial." 
+  },
+  { 
+    id: "11", name: "Mutare Rd", location: "Near Electrosales Msasa", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.835, lng: 31.110 }, 
+    imageUrl: "https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Industrial and Msasa traffic." 
+  },
+  { 
+    id: "12", name: "Enterprise Rd", location: "Near Newlands Shops", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.805, lng: 31.075 }, 
+    imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Premium shopping area visibility." 
+  },
+
+  // Page 7
+  { 
+    id: "13", name: "Harare/Chinhoyi Rd", location: "100m from Tollgate", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.755, lng: 30.950 }, 
+    imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Highway exit/entry point." 
+  },
+  { 
+    id: "14", name: "Chitungwiza Rd", location: "Near Irvines", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.950, lng: 31.050 }, 
+    imageUrl: "https://images.unsplash.com/photo-1596701062351-8c2c14d1fdd0?auto=format&fit=crop&q=80&w=800", 
+    visibility: "High density commuter traffic." 
+  },
+  { 
+    id: "15", name: "Seke Rd", location: "Chitungwiza", town: "Chitungwiza", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -18.005, lng: 31.080 }, 
+    imageUrl: "https://images.unsplash.com/photo-1552084117-5635e80c8dd0?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Main Chitungwiza arterial." 
+  },
+
+  // Page 8
+  { 
+    id: "16", name: "Airport Rd (Dieppe)", location: "Near Dieppe Rd Round-about", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.840, lng: 31.080 }, 
+    imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Strategic roundabout location." 
+  },
+
+  // Page 9
+  { 
+    id: "17", name: "Harare/Mutare Rd", location: "100m from Tollgate", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.850, lng: 31.180 }, 
+    imageUrl: "https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Main eastern exit." 
+  },
+  { 
+    id: "18", name: "Mabvuku Turn-off", location: "100m from Turn Off", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.845, lng: 31.150 }, 
+    imageUrl: "https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&q=80&w=800", 
+    visibility: "High density residential turn-off." 
+  },
+  { 
+    id: "19", name: "ED Mnangagwa Rd", location: "Near Chishawasha Turn-off", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.780, lng: 31.200 }, 
+    imageUrl: "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Growing affluent residential corridor." 
+  },
+
+  // Page 10
+  { 
+    id: "20", name: "Borrowdale Road", location: "Helensvale", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.740, lng: 31.110 }, 
+    imageUrl: "https://images.unsplash.com/photo-1582650625119-3a31f8fa2699?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Premium Borrowdale traffic." 
+  },
+  { 
+    id: "21", name: "Harare Drive", location: "Cnr 2nd Street Northwood", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.750, lng: 31.080 }, 
+    imageUrl: "https://images.unsplash.com/photo-1523966211575-eb4a63459bf1?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Major intersection." 
+  },
+  { 
+    id: "22", name: "Cork Rd", location: "Avondale", town: "Harare", type: BillboardType.Static, 
+    width: 6, height: 7, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', 
+    coordinates: { lat: -17.795, lng: 31.035 }, 
+    imageUrl: "https://images.unsplash.com/photo-1565514020176-db8b0059b023?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Leafy suburb, high net worth traffic." 
+  },
+
+  // Page 11 - LED
+  { 
+    id: "23", name: "Oldlock LED Digital", location: "Harare Premier Location", town: "Harare", type: BillboardType.LED, 
+    width: 3, height: 6, ratePerSlot: 650, totalSlots: 10, rentedSlots: 0, 
+    coordinates: { lat: -17.750, lng: 31.085 }, 
+    imageUrl: "https://images.unsplash.com/photo-1562512684-25cb974cb30b?auto=format&fit=crop&q=80&w=800", 
+    visibility: "Ultra-high definition LED. 2000px x 3000px. >400 plays/day." 
+  }
 ];
 
 // --- Persistence Helpers ---
@@ -155,7 +300,7 @@ export const createSystemBackup = () => {
     saveToStorage(STORAGE_KEYS.LAST_BACKUP, lastBackupDate);
     
     return JSON.stringify({
-        version: '1.4.6',
+        version: '1.5.1',
         timestamp: new Date().toISOString(),
         data: {
             billboards, contracts, clients, invoices, expenses, 
@@ -165,7 +310,11 @@ export const createSystemBackup = () => {
 };
 
 export const restoreDefaultBillboards = () => {
-    // Add any from INITIAL_BILLBOARDS that are not in current 'billboards' list by ID
+    // IMPORTANT: In 1.4.8 this forces a full sync to the new catalogue list
+    // It will add missing ones from the new list.
+    // It will NOT delete existing ones to prevent data loss on contracts, but 
+    // for a fresh cleanup, the user can use "Reset System" then this.
+    
     const currentIds = new Set(billboards.map(b => b.id));
     let addedCount = 0;
     
@@ -178,7 +327,7 @@ export const restoreDefaultBillboards = () => {
     
     if (addedCount > 0) {
         saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards);
-        logAction('Data Restore', `Restored ${addedCount} missing default billboards.`);
+        logAction('Data Restore', `Restored ${addedCount} missing catalogue billboards.`);
     }
     return addedCount;
 };
@@ -229,34 +378,37 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
-        version: '1.4.6',
+        version: '1.5.1',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-        title: 'Inventory Restoration',
+        title: 'Responsiveness & Layout Fixes',
         features: [
-            'Added "Restore Default Inventory" feature to bring back the original 21 billboards if lost.',
-            'Fixed data initialization logic for missing assets.',
-            'Expanded default database to include billboards in Bulawayo, Mutare, Gweru, and more.'
+            'Fixed sidebar z-index issues on mobile devices.',
+            'Added horizontal scrolling to data tables for better mobile viewing.',
+            'Optimized header layouts to prevent button overlapping on small screens.',
+            'Improved grid collapsing for Dashboard and Settings modules on tablets.'
         ]
     },
     {
-        version: '1.4.5',
-        date: '2/22/2026 01:00 PM',
-        title: 'Persistence & Logo Fixes',
+        version: '1.5.0',
+        date: '2/22/2026 02:00 PM',
+        title: 'Premium UI Overhaul',
         features: [
-            'Fixed critical data persistence issues.',
-            'Company Logo now saves immediately upon selection.',
-            'Added Storage Usage indicator in Settings.',
-            'Improved list refreshing stability.',
-            'Enhanced error handling for database storage.'
+            'Complete visual redesign with Glassmorphism aesthetics.',
+            'New dark mode gradient sidebar for immersive navigation.',
+            'Enhanced dashboard analytics with gradient charts and glowing cards.',
+            'Refined button interactions and global backdrop filters.',
+            'Improved mobile responsiveness for the new layout.'
         ]
     },
     {
-        version: '1.4.4',
-        date: '2/22/2026 12:30 PM',
-        title: 'Printing Module Fixes',
+        version: '1.4.8',
+        date: '2/22/2026 01:45 PM',
+        title: 'Inventory Sync: 2025 Catalogue',
         features: [
-            'Removed hardcoded simulation costs in Printing module.',
-            'Printing analytics now reflect actual real-time data.'
+            'Updated default inventory to match the 23 locations in the Dreambox 2025 Catalogue.',
+            'Added new locations: Bindura Tollgate, Chitungwiza Rd, Seke Rd, etc.',
+            'Updated pricing for all static and digital assets.',
+            'Added specific "Oldlock LED Digital" specs.'
         ]
     }
 ];
