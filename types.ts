@@ -54,6 +54,7 @@ export interface Client {
   email: string;
   phone: string;
   status: 'Active' | 'Inactive';
+  billingDay?: number; // Preferred day of month for payment
 }
 
 export interface Contract {

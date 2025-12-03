@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Map, Users, FileText, CreditCard, Receipt, Settings as SettingsIcon,
@@ -12,7 +10,7 @@ interface LayoutProps {
   children: React.ReactNode;
   currentPage: string;
   onNavigate: (page: string) => void;
-  onLogout: () => void; // New Prop
+  onLogout: () => void;
 }
 
 export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigate, onLogout }) => {
@@ -21,16 +19,12 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
   const user = getCurrentUser();
 
   useEffect(() => {
-    // Initial fetch
     setAlertCount(getSystemAlertCount());
-    
-    // Set up polling interval to check for updates every 10 seconds
     const interval = setInterval(() => {
         setAlertCount(getSystemAlertCount());
     }, 10000);
-
     return () => clearInterval(interval);
-  }, [currentPage]); // Also update when changing pages
+  }, [currentPage]);
 
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -52,7 +46,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
   };
 
   return (
-    <div className="flex h-screen bg-slate-50">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div 
@@ -61,13 +55,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
         />
       )}
 
-      {/* Sidebar */}
+      {/* Sidebar - Updated for scrolling */}
       <aside 
-        className={`fixed top-0 left-0 z-50 h-full w-64 bg-slate-900 text-white transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-900 text-white transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
-        <div className="flex items-center justify-between p-6 border-b border-slate-800">
+        {/* Sidebar Header - Static */}
+        <div className="flex items-center justify-between p-6 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/30">S</div>
              <span className="font-bold text-lg tracking-tight">Billboard Suite</span>
@@ -77,7 +72,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
           </button>
         </div>
 
-        <nav className="p-4 space-y-1">
+        {/* Navigation - Scrollable */}
+        <nav className="flex-1 overflow-y-auto p-4 space-y-1 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
@@ -94,14 +90,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
                     : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                 }`}
               >
-                <Icon size={20} className="mr-3" />
+                <Icon size={20} className="mr-3 shrink-0" />
                 {item.label}
               </button>
             );
           })}
         </nav>
 
-        <div className="absolute bottom-0 w-full p-6 border-t border-slate-800 bg-slate-900">
+        {/* Sidebar Footer - Static */}
+        <div className="p-6 border-t border-slate-800 bg-slate-900 shrink-0">
            <div className="flex items-center gap-3 mb-4">
               <div className="w-9 h-9 rounded-full bg-slate-700 flex items-center justify-center text-sm font-bold border border-slate-600">
                   {user?.firstName?.charAt(0) || 'U'}
@@ -115,18 +112,17 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
               </button>
            </div>
            
-           {/* Deployment Version Indicator */}
            <div className="flex items-center justify-between text-[10px] text-slate-500 bg-slate-800/50 py-1.5 px-3 rounded-full border border-slate-800">
               <span className="flex items-center gap-1.5"><Radio size={10} className="text-green-500 animate-pulse"/> Live System</span>
-              <span className="font-mono">v1.3.0</span>
+              <span className="font-mono">v1.4.1</span>
            </div>
         </div>
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="flex-1 flex flex-col min-w-0 overflow-hidden h-full">
         {/* Header */}
-        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-30">
+        <header className="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-6 sticky top-0 z-30 shrink-0">
           <div className="flex items-center gap-4">
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-slate-600 hover:text-slate-900">
                <Menu size={24} />
@@ -150,7 +146,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
 
         {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-           <div className="max-w-7xl mx-auto">
+           <div className="max-w-7xl mx-auto pb-10">
              {children}
            </div>
         </div>

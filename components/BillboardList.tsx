@@ -27,8 +27,16 @@ const MinimalTextArea = ({ label, value, onChange, required = false }: any) => (
   </div>
 );
 
+interface BillboardCardProps {
+  billboard: Billboard;
+  onEdit: (b: Billboard) => void;
+  onDelete: (b: Billboard) => void;
+  getClientName: (id?: string) => string;
+  onShare: (b: Billboard) => void;
+}
+
 // Helper Component for the Billboard Card
-const BillboardCard = ({ billboard, onEdit, onDelete, getClientName, onShare }: { billboard: Billboard, onEdit: (b: Billboard) => void, onDelete: (b: Billboard) => void, getClientName: (id?: string) => string, onShare: (b: Billboard) => void }) => (
+const BillboardCard: React.FC<BillboardCardProps> = ({ billboard, onEdit, onDelete, getClientName, onShare }) => (
     <div className="group bg-white rounded-2xl shadow-sm hover:shadow-xl border border-slate-100 transition-all duration-500 overflow-hidden flex flex-col h-full hover:-translate-y-1">
         <div className="h-48 bg-slate-200 relative overflow-hidden shrink-0">
             {billboard.imageUrl ? (
