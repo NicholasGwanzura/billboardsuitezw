@@ -44,18 +44,18 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
   const handleLogout = () => { logout(); onLogout(); };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f8fafc]">
+    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] supports-[height:100dvh]:h-[100dvh]">
       {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
+          className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[90] lg:hidden transition-opacity"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       {/* Sidebar - Premium Dark Glass Gradient */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 w-72 transform transition-transform duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] lg:translate-x-0 lg:static flex flex-col ${
+        className={`fixed inset-y-0 left-0 z-[100] w-72 transform transition-transform duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] lg:translate-x-0 lg:static flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } bg-slate-900 shadow-2xl border-r border-white/5 relative overflow-hidden`}
       >
@@ -73,7 +73,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
                 <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-medium">Advertising</span>
              </div>
           </div>
-          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white transition-colors">
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white transition-colors p-1">
             <X size={24} />
           </button>
         </div>
@@ -123,7 +123,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
            
            <div className="flex items-center justify-between text-[10px] text-slate-500 py-1 px-1">
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div> System Online</span>
-              <span className="font-mono opacity-50">v1.5.1</span>
+              <span className="font-mono opacity-50">v1.5.4</span>
            </div>
         </div>
       </aside>
@@ -134,22 +134,22 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
         <div className="absolute inset-0 pointer-events-none z-0 opacity-40" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
 
         {/* Glass Header */}
-        <header className="glass sticky top-0 z-30 h-auto min-h-[5rem] flex items-center justify-between px-6 lg:px-8 py-3 shrink-0 transition-all duration-300">
-          <div className="flex items-center gap-4">
+        <header className="glass sticky top-0 z-40 h-auto min-h-[4rem] sm:min-h-[4.5rem] flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 shrink-0 transition-all duration-300 shadow-sm sm:shadow-none">
+          <div className="flex items-center gap-3 sm:gap-4">
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100/50 rounded-xl transition-colors">
                <Menu size={24} />
              </button>
-             <h1 className="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 tracking-tight capitalize">
+             <h1 className="text-lg sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 tracking-tight capitalize truncate max-w-[150px] sm:max-w-none">
                {currentPage.replace('-', ' ')}
              </h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/50 border border-slate-200/60 rounded-full text-xs font-medium text-slate-600 shadow-sm backdrop-blur-sm">
                 <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
                 <span>Harare, ZW</span>
              </div>
-             <button onClick={() => onNavigate('dashboard')} className="relative p-2.5 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-full transition-all duration-300 hover:shadow-md" title={`${alertCount} System Alerts`}>
+             <button onClick={() => onNavigate('dashboard')} className="relative p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-full transition-all duration-300 hover:shadow-md" title={`${alertCount} System Alerts`}>
                 <Bell size={22} />
                 {alertCount > 0 && (
                     <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
@@ -161,8 +161,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
         </header>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 relative z-10 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
-           <div className="max-w-7xl mx-auto pb-10">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 relative z-10 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
+           <div className="max-w-7xl mx-auto pb-20">
              {children}
            </div>
         </div>

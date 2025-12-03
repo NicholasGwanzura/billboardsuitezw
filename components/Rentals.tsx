@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { getContracts, getBillboards, addContract, addInvoice, mockClients, deleteContract } from '../services/mockData';
 import { generateContractPDF } from '../services/pdfGenerator';
@@ -8,7 +9,7 @@ import { FileText, Calendar, Download, Eye, Plus, X, Wand2, RefreshCw, CheckCirc
 const MinimalInput = ({ label, value, onChange, type = "text", required = false, disabled = false }: any) => {
   const isDate = type === 'date';
   return (
-    <div className="group relative pt-2">
+    <div className="group relative pt-4 w-full">
         <input 
         type={type} 
         required={required}
@@ -19,7 +20,7 @@ const MinimalInput = ({ label, value, onChange, type = "text", required = false,
         className="peer w-full px-0 py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium placeholder-transparent disabled:opacity-50" 
         />
         <label className={`absolute left-0 -top-0 text-xs text-slate-400 font-medium transition-all uppercase tracking-wide 
-            ${isDate ? '' : 'peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-4'} 
+            ${isDate ? '' : 'peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-6'} 
             peer-focus:-top-0 peer-focus:text-xs peer-focus:text-slate-800 pointer-events-none`}>
         {label}
         </label>
@@ -28,7 +29,7 @@ const MinimalInput = ({ label, value, onChange, type = "text", required = false,
 };
 
 const MinimalSelect = ({ label, value, onChange, options, disabled = false }: any) => (
-  <div className="group relative pt-2">
+  <div className="group relative pt-4 w-full">
     <select 
       value={value}
       onChange={onChange}
@@ -180,60 +181,71 @@ export const Rentals: React.FC = () => {
       <div className="space-y-8 animate-fade-in">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 mb-2">Rentals Module</h2>
-            <p className="text-slate-500 font-medium">Active contracts, renewals, and availability tracking</p>
+            <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 mb-2">Rentals Module</h2>
+            <p className="text-slate-500 font-medium text-sm sm:text-base">Active contracts, renewals, and availability</p>
           </div>
           <button onClick={() => setIsCreateModalOpen(true)} className="bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-bold uppercase tracking-wider hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center gap-2">
-            <Plus size={18} /> New Rental
+            <Plus size={18} /> <span className="hidden sm:inline">New Rental</span><span className="sm:hidden">New</span>
           </button>
         </div>
 
         <div className="grid gap-4">
           {rentals.map(contract => (
-            <div key={contract.id} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group hover:-translate-y-0.5 duration-300">
-              <div className="flex items-start gap-5">
-                <div className="p-4 bg-indigo-50 rounded-2xl group-hover:bg-indigo-600 transition-colors group-hover:text-white text-indigo-600">
-                  <FileText className="w-6 h-6" />
+            <div key={contract.id} className="bg-white rounded-2xl p-4 sm:p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 group hover:-translate-y-0.5 duration-300">
+              <div className="flex items-start gap-4 w-full lg:w-auto">
+                <div className="p-3 sm:p-4 bg-indigo-50 rounded-2xl group-hover:bg-indigo-600 transition-colors group-hover:text-white text-indigo-600 shrink-0">
+                  <FileText className="w-5 h-5 sm:w-6 sm:h-6" />
                 </div>
-                <div>
-                  <h3 className="font-bold text-slate-900 text-lg">{getClientName(contract.clientId)}</h3>
-                  <div className="flex items-center gap-2 text-sm text-slate-500 mt-1">
-                    <span className="font-medium text-slate-700">{getBillboardName(contract.billboardId)}</span>
-                    <span className="text-slate-300">•</span>
-                    <span className={`font-bold px-2 py-0.5 rounded text-xs ${contract.side ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}>
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-bold text-slate-900 text-base sm:text-lg truncate">{getClientName(contract.clientId)}</h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-2 text-xs sm:text-sm text-slate-500 mt-1">
+                    <span className="font-medium text-slate-700 truncate">{getBillboardName(contract.billboardId)}</span>
+                    <span className="hidden sm:inline text-slate-300">•</span>
+                    <span className={`font-bold px-2 py-0.5 rounded text-[10px] sm:text-xs w-fit ${contract.side ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}>
                       {contract.details}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 mt-3 text-xs text-slate-400 uppercase tracking-wide font-medium">
+                  <div className="flex items-center gap-3 mt-2 sm:mt-3 text-[10px] sm:text-xs text-slate-400 uppercase tracking-wide font-medium flex-wrap">
                     <span className="flex items-center gap-1"><Calendar size={12} /> {contract.startDate} — {contract.endDate}</span>
                     <span>ID: {contract.id}</span>
                   </div>
                 </div>
               </div>
 
-              <div className="flex flex-col md:items-end gap-1 w-full md:w-auto pl-16 md:pl-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-400 font-medium">Value:</span>
-                  <span className="text-2xl font-bold text-slate-900 tracking-tight">${contract.totalContractValue.toLocaleString()}</span>
+              <div className="flex flex-row lg:flex-col lg:items-end gap-2 w-full lg:w-auto pl-0 lg:pl-16 justify-between lg:justify-start items-center">
+                <div className="flex flex-col lg:items-end">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs sm:text-sm text-slate-400 font-medium hidden sm:inline">Value:</span>
+                        <span className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight">${contract.totalContractValue.toLocaleString()}</span>
+                    </div>
+                    <div className="flex gap-2 text-[10px] text-slate-500 uppercase tracking-wide">
+                        {contract.monthlyRate > 0 && <span>${contract.monthlyRate}/mo</span>}
+                    </div>
                 </div>
-                <div className="flex gap-2 text-[10px] text-slate-500 uppercase tracking-wide">
-                  {contract.monthlyRate > 0 && <span>${contract.monthlyRate}/mo</span>}
+                
+                <div className="flex gap-2">
+                    <button onClick={() => setSelectedRental(contract)} className="px-3 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-1">
+                        <Eye size={14} /> <span className="hidden sm:inline">View</span>
+                    </button>
+                    <button onClick={() => { const client = getClient(contract.clientId); if(client) generateContractPDF(contract, client, getBillboardName(contract.billboardId)); }} className="px-3 py-2 text-[10px] sm:text-xs font-bold uppercase tracking-wider text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-1 shadow-lg hover:shadow-slate-500/30">
+                        <Download size={14} /> <span className="hidden sm:inline">PDF</span>
+                    </button>
+                    <button onClick={() => setRentalToDelete(contract)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete Rental">
+                        <Trash2 size={16} />
+                    </button>
                 </div>
-              </div>
-              
-              <div className="flex gap-3 w-full md:w-auto border-t md:border-t-0 border-slate-100 pt-5 md:pt-0 mt-2 md:mt-0 pl-16 md:pl-0">
-                <button onClick={() => setSelectedRental(contract)} className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-500 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-colors flex items-center gap-2">
-                    <Eye size={14} /> View
-                </button>
-                <button onClick={() => { const client = getClient(contract.clientId); if(client) generateContractPDF(contract, client, getBillboardName(contract.billboardId)); }} className="px-4 py-2 text-xs font-bold uppercase tracking-wider text-white bg-slate-900 hover:bg-slate-800 rounded-lg transition-colors flex items-center gap-2 shadow-lg hover:shadow-slate-500/30">
-                    <Download size={14} /> PDF
-                </button>
-                <button onClick={() => setRentalToDelete(contract)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors" title="Delete Rental">
-                    <Trash2 size={16} />
-                </button>
               </div>
             </div>
           ))}
+          {rentals.length === 0 && (
+              <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-slate-200">
+                  <div className="w-16 h-16 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <FileText className="text-slate-300" size={32}/>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mb-1">No Active Rentals</h3>
+                  <p className="text-slate-500 text-sm">Create a new rental agreement to get started.</p>
+              </div>
+          )}
         </div>
       </div>
 
@@ -245,12 +257,14 @@ export const Rentals: React.FC = () => {
                     <button onClick={() => setIsCreateModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button>
                 </div>
                 <div className="grid grid-cols-1 lg:grid-cols-2">
-                    <form onSubmit={handleCreateRental} className="p-8 space-y-8 border-r border-slate-100">
-                        <MinimalSelect label="Select Client" value={newRental.clientId} onChange={(e: any) => setNewRental({...newRental, clientId: e.target.value})} options={[{value: '', label: 'Select Client...'}, ...mockClients.map(c => ({value: c.id, label: c.companyName}))]} />
-                        <MinimalSelect label="Select Billboard" value={newRental.billboardId} onChange={(e: any) => { setNewRental(prev => ({...prev, billboardId: e.target.value})); }} options={[{value: '', label: 'Select Billboard...'}, ...getBillboards().map(b => ({value: b.id, label: `${b.name} (${b.type})`}))]} />
+                    <form onSubmit={handleCreateRental} className="p-6 sm:p-8 space-y-6 sm:space-y-8 border-r border-slate-100">
+                        <div className="space-y-6">
+                            <MinimalSelect label="Select Client" value={newRental.clientId} onChange={(e: any) => setNewRental({...newRental, clientId: e.target.value})} options={[{value: '', label: 'Select Client...'}, ...mockClients.map(c => ({value: c.id, label: c.companyName}))]} />
+                            <MinimalSelect label="Select Billboard" value={newRental.billboardId} onChange={(e: any) => { setNewRental(prev => ({...prev, billboardId: e.target.value})); }} options={[{value: '', label: 'Select Billboard...'}, ...getBillboards().map(b => ({value: b.id, label: `${b.name} (${b.type})`}))]} />
+                        </div>
 
                         {selectedBillboard?.type === BillboardType.Static && (
-                             <div className="flex gap-4">
+                             <div className="flex flex-col sm:flex-row gap-4">
                                 {(['A', 'B', 'Both'] as const).map(side => {
                                     const available = isSideAvailable(side);
                                     let price = 0;
@@ -274,13 +288,13 @@ export const Rentals: React.FC = () => {
                         {selectedBillboard?.type === BillboardType.LED && (
                             <MinimalSelect label="Select Slot" value={newRental.slotNumber} onChange={(e: any) => setNewRental({...newRental, slotNumber: Number(e.target.value)})} options={Array.from({length: selectedBillboard.totalSlots || 10}, (_, i) => ({value: i+1, label: `Slot ${i+1}`}))} />
                         )}
-                        <div className="grid grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             <MinimalInput label="Start Date" type="date" value={newRental.startDate} onChange={(e: any) => setNewRental({...newRental, startDate: e.target.value})} required />
                             <MinimalInput label="End Date" type="date" value={newRental.endDate} onChange={(e: any) => setNewRental({...newRental, endDate: e.target.value})} required />
                         </div>
                         <div className="bg-slate-50 p-6 rounded-2xl space-y-6">
                             <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Financials</h4>
-                            <div className="grid grid-cols-2 gap-6">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <MinimalInput label="Monthly Rate ($)" type="number" value={newRental.monthlyRate} onChange={(e: any) => setNewRental({...newRental, monthlyRate: Number(e.target.value)})} />
                                 <MinimalInput label="Install Fee ($)" type="number" value={newRental.installationCost} onChange={(e: any) => setNewRental({...newRental, installationCost: Number(e.target.value)})} />
                             </div>
