@@ -25,7 +25,8 @@ const runAutoTable = (doc: any, options: any) => {
 };
 
 const addCompanyHeader = (doc: jsPDF): number => {
-    const profile = getCompanyProfile();
+    // IMPORTANT: Fetch profile here inside the function to get the latest state from LocalStorage
+    const profile = getCompanyProfile(); 
     const logo = getCompanyLogo();
     const pageWidth = doc.internal.pageSize.width;
     let startY = 15;
@@ -202,6 +203,7 @@ export const generateInvoicePDF = (invoice: Invoice, client: Client) => {
 export const generateContractPDF = (contract: Contract, client: Client, billboardName: string) => {
   try {
     const doc = new jsPDF();
+    // Use function to get latest profile state
     const profile = getCompanyProfile();
 
     // Add Company Header
@@ -292,18 +294,61 @@ export const generateContractPDF = (contract: Contract, client: Client, billboar
     doc.setFont("helvetica", "bold");
     doc.text(`Total Contract Value: $${contract.totalContractValue.toFixed(2)}`, 20, currentY);
     
-    currentY += 20;
+    currentY += 15;
+
+    // New Section: Terms and Conditions
+    doc.setFontSize(12);
+    doc.setTextColor(15, 23, 42);
+    doc.setFont("helvetica", "bold");
+    doc.text('3. Terms and Conditions', 14, currentY);
+    
+    currentY += 8;
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(50);
+    
+    const terms = [
+        "1. PAYMENT: All rental payments are due in advance on the 1st of each month unless otherwise specified.",
+        "2. ARTWORK: The Lessee is responsible for providing artwork in the required format. Printing costs are separate unless stated.",
+        "3. MAINTENANCE: The Lessor shall maintain the structure in good repair. Damage caused by weather (Acts of God) will be repaired by Lessor.",
+        "4. INDEMNITY: The Lessee indemnifies the Lessor against claims arising from the content of the advertisement.",
+        "5. TERMINATION: Either party may terminate this agreement with 30 days written notice prior to the end of the contract term.",
+        "6. JURISDICTION: This agreement is governed by the laws of Zimbabwe."
+    ];
+    
+    terms.forEach(term => {
+        doc.text(term, 20, currentY);
+        currentY += 5;
+    });
+    
+    currentY += 15;
     
     // Signatures
-    doc.setFontSize(11);
-    doc.text("Signatures", 14, currentY);
-    currentY += 10;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "bold");
+    doc.setTextColor(15, 23, 42);
+    doc.text("4. Signatures", 14, currentY);
     
-    doc.line(14, currentY + 15, 80, currentY + 15); // Line 1
-    doc.text("For Lessor", 14, currentY + 20);
+    currentY += 15;
     
-    doc.line(110, currentY + 15, 176, currentY + 15); // Line 2
-    doc.text("For Lessee", 110, currentY + 20);
+    // Draw Signature Boxes
+    const boxY = currentY;
+    
+    // Box 1 - Lessor
+    doc.setDrawColor(200);
+    doc.setLineWidth(0.5);
+    doc.rect(14, boxY, 80, 30);
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text("Signed for and on behalf of Lessor:", 16, boxY + 5);
+    doc.line(20, boxY + 22, 80, boxY + 22); // Signature line
+    doc.text(profile.name, 20, boxY + 27);
+
+    // Box 2 - Lessee
+    doc.rect(110, boxY, 80, 30);
+    doc.text("Signed for and on behalf of Lessee:", 112, boxY + 5);
+    doc.line(116, boxY + 22, 176, boxY + 22); // Signature line
+    doc.text(client.companyName, 116, boxY + 27);
 
     // Footer
     doc.setFontSize(8);
@@ -422,4 +467,3 @@ export const generateStatementPDF = (client: Client, transactions: Invoice[], ac
         alert("Failed to generate Statement PDF.");
     }
 };
-    

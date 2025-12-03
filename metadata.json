@@ -1,6 +1,6 @@
 {
   "name": "Billboard Suite",
-  "version": "1.4.0",
+  "version": "1.4.4",
   "description": "Premium billboard rental management system featuring inventory tracking, financial operations, and real-time analytics.",
   "requestFramePermissions": []
 }

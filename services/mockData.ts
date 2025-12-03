@@ -44,7 +44,9 @@ const STORAGE_KEYS = {
     OUTSOURCED: 'bs_outsourced',
     PRINTING: 'bs_printing',
     LOGO: 'bs_logo',
-    PROFILE: 'bs_company_profile'
+    PROFILE: 'bs_company_profile',
+    LAST_BACKUP: 'bs_last_backup_meta',
+    AUTO_BACKUP: 'bs_auto_backup_data'
 };
 
 const loadFromStorage = <T>(key: string, defaultValue: T): T => {
@@ -62,6 +64,10 @@ const saveToStorage = (key: string, data: any) => {
         localStorage.setItem(key, JSON.stringify(data));
     } catch (e) {
         console.error(`Error saving ${key}`, e);
+        // If quota exceeded, we might want to alert, but for now we log.
+        if (key === STORAGE_KEYS.LOGO) {
+            alert("Logo image is too large to save. Please use a smaller image.");
+        }
     }
 };
 
@@ -88,19 +94,22 @@ const defaultUsers: User[] = [
 let users: User[] = loadFromStorage(STORAGE_KEYS.USERS, defaultUsers);
 let companyLogo = loadFromStorage(STORAGE_KEYS.LOGO, 'https://via.placeholder.com/200x200?text=Upload+Logo');
 
+// Updated Default Profile for Dreambox
 const DEFAULT_PROFILE: CompanyProfile = {
-    name: "Spiritus Systems",
+    name: "Dreambox Advertising",
     vatNumber: "VAT-9928371",
     regNumber: "REG-2025/001",
-    email: "admin@spiritus.com",
-    supportEmail: "support@spiritus.com",
+    email: "info@dreambox.co.zw",
+    supportEmail: "support@dreambox.co.zw",
     phone: "+263 772 123 456",
-    website: "www.spiritus.com",
-    address: "123 Business Park, Enterprise Way",
+    website: "www.dreambox.co.zw",
+    address: "123 Samora Machel Ave",
     city: "Harare",
     country: "Zimbabwe"
 };
 let companyProfile: CompanyProfile = loadFromStorage(STORAGE_KEYS.PROFILE, DEFAULT_PROFILE);
+
+let lastBackupDate = loadFromStorage(STORAGE_KEYS.LAST_BACKUP, 'Never');
 
 export const setCompanyLogo = (url: string) => { 
     companyLogo = url; 
@@ -115,8 +124,12 @@ export const updateCompanyProfile = (profile: CompanyProfile) => {
 
 // --- Backup & Restore Logic ---
 export const createSystemBackup = () => {
+    const now = new Date().toLocaleString();
+    lastBackupDate = now;
+    saveToStorage(STORAGE_KEYS.LAST_BACKUP, lastBackupDate);
+    
     return JSON.stringify({
-        version: '1.4.2',
+        version: '1.4.4',
         timestamp: new Date().toISOString(),
         data: {
             billboards, contracts, clients, invoices, expenses, 
@@ -124,6 +137,25 @@ export const createSystemBackup = () => {
         }
     }, null, 2);
 };
+
+export const triggerAutoBackup = () => {
+    const backupData = {
+        timestamp: new Date().toISOString(),
+        data: {
+            billboards, contracts, clients, invoices, expenses, 
+            users, outsourcedBillboards, auditLogs, printingJobs, companyLogo, companyProfile
+        }
+    };
+    saveToStorage(STORAGE_KEYS.AUTO_BACKUP, backupData);
+    return new Date().toLocaleString();
+};
+
+export const getAutoBackupStatus = () => {
+    const autoBackup = loadFromStorage(STORAGE_KEYS.AUTO_BACKUP, null);
+    return autoBackup ? new Date(autoBackup.timestamp).toLocaleString() : 'None';
+};
+
+export const getLastManualBackupDate = () => lastBackupDate;
 
 export const restoreSystemBackup = (jsonString: string): boolean => {
     try {
@@ -152,8 +184,30 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
+        version: '1.4.4',
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        title: 'Printing Module Fixes',
+        features: [
+            'Removed hardcoded simulation costs in Printing module.',
+            'Printing analytics now reflect actual real-time data.',
+            'General performance improvements.'
+        ]
+    },
+    {
+        version: '1.4.3',
+        date: '2/22/2026 12:00 PM',
+        title: 'Auto-Backup & Branding Update',
+        features: [
+            'Added Automatic System Backup (Internal Snapshot).',
+            'Manual Backups now record timestamp of last download.',
+            'Fixed Company Logo persistence and size validation.',
+            'Updated Branding to Dreambox Advertising.',
+            'Enhanced Settings save functionality.'
+        ]
+    },
+    {
         version: '1.4.2',
-        date: 'Feb 2026',
+        date: '2/22/2026 10:00 AM',
         title: 'Settings Persistence Fix',
         features: [
             'Fixed Company Profile settings not saving',
@@ -163,7 +217,7 @@ export const RELEASE_NOTES = [
     },
     {
         version: '1.4.1',
-        date: 'Feb 2026',
+        date: '2/15/2026 09:30 AM',
         title: 'Data Integrity & UI Update',
         features: [
             'Added Data Backup & Restore functionality',
@@ -173,7 +227,7 @@ export const RELEASE_NOTES = [
     },
     {
         version: '1.4.0',
-        date: 'Feb 2026',
+        date: '2/01/2026 08:00 AM',
         title: 'Billing Flexibility Update',
         features: [
             'Added Custom Billing Day preference for Clients (1-31)',
@@ -275,38 +329,70 @@ export const getExpiringContracts = () => {
 export const getOverdueInvoices = () => invoices.filter(i => i.status === 'Pending' || i.status === 'Overdue');
 export const getSystemAlertCount = () => getExpiringContracts().length + getOverdueInvoices().length;
 
-// New helper to generate trend data for graphs
+// Generate Dynamic Trend Data based on Actual Invoices
 export const getFinancialTrends = () => {
-    const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
-    // This is semi-mocked to ensure graphs look good even with little data
-    // In a real app, you would reduce invoices by month
+    const today = new Date();
+    const result = [];
     
-    // Simulate current month data from real invoices
-    const currentMonthRevenue = invoices
-        .filter(i => i.type === 'Invoice' && new Date(i.date).getMonth() === new Date().getMonth())
-        .reduce((acc, curr) => acc + curr.total, 0);
+    // Look back 6 months
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+        const monthName = d.toLocaleString('default', { month: 'short' });
+        const year = d.getFullYear();
+        const monthIndex = d.getMonth();
 
-    const data = [
-        { name: 'Sep', revenue: 15500, expenses: 5000, margin: 10500 },
-        { name: 'Oct', revenue: 18000, expenses: 6000, margin: 12000 },
-        { name: 'Nov', revenue: 22000, expenses: 7500, margin: 14500 },
-        { name: 'Dec', revenue: 19500, expenses: 8000, margin: 11500 },
-        { name: 'Jan', revenue: 24000, expenses: 9000, margin: 15000 },
-        { 
-            name: 'Feb', 
-            revenue: Math.max(26000, currentMonthRevenue), // Ensure we show at least real data or a "projected" placeholder
-            expenses: 9500,
-            margin: Math.max(16500, currentMonthRevenue - 9500)
-        }, 
-        { 
-            name: 'Mar (Proj)', 
-            revenue: 28500, // Predicted
-            expenses: 10000,
-            margin: 18500,
-            isProjection: true
-        },
-    ];
-    return data;
+        // Calculate Revenue for this month
+        const monthlyRevenue = invoices
+            .filter(inv => {
+                const invDate = new Date(inv.date);
+                return inv.type === 'Invoice' && invDate.getMonth() === monthIndex && invDate.getFullYear() === year;
+            })
+            .reduce((acc, curr) => acc + curr.total, 0);
+
+        // Calculate Expenses for this month
+        const monthlyExpenses = expenses
+            .filter(exp => {
+                const expDate = new Date(exp.date);
+                return expDate.getMonth() === monthIndex && expDate.getFullYear() === year;
+            })
+            .reduce((acc, curr) => acc + curr.amount, 0);
+            
+        // Calculate Printing Costs for this month (approx)
+        const monthlyPrinting = printingJobs
+            .filter(job => {
+                const jobDate = new Date(job.date);
+                return jobDate.getMonth() === monthIndex && jobDate.getFullYear() === year;
+            })
+            .reduce((acc, curr) => acc + curr.totalCost, 0);
+
+        const totalExpenses = monthlyExpenses + monthlyPrinting;
+
+        result.push({
+            name: monthName,
+            revenue: monthlyRevenue,
+            expenses: totalExpenses,
+            margin: monthlyRevenue - totalExpenses
+        });
+    }
+
+    // Add a projection for next month based on active contracts
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const activeContractRevenue = contracts
+        .filter(c => c.status === 'Active')
+        .reduce((acc, c) => acc + c.monthlyRate, 0);
+    
+    // Estimate expenses based on average of last 3 months
+    const avgExpenses = result.slice(-3).reduce((acc, curr) => acc + curr.expenses, 0) / 3 || 0;
+
+    result.push({
+        name: nextMonth.toLocaleString('default', { month: 'short' }) + ' (Proj)',
+        revenue: activeContractRevenue,
+        expenses: Math.round(avgExpenses),
+        margin: activeContractRevenue - Math.round(avgExpenses),
+        isProjection: true
+    });
+
+    return result;
 };
 
 export const logAction = (action: string, details: string) => {

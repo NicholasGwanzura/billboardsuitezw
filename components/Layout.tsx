@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Map, Users, FileText, CreditCard, Receipt, Settings as SettingsIcon,
   Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, Radio
 } from 'lucide-react';
 import { getCurrentUser, logout } from '../services/authService';
-import { getSystemAlertCount } from '../services/mockData';
+import { getSystemAlertCount, triggerAutoBackup } from '../services/mockData';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -19,11 +20,26 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
   const user = getCurrentUser();
 
   useEffect(() => {
+    // Initial fetch
     setAlertCount(getSystemAlertCount());
+    
+    // Auto-backup on mount (runs once per session start usually)
+    triggerAutoBackup();
+
+    // Periodic updates
     const interval = setInterval(() => {
         setAlertCount(getSystemAlertCount());
     }, 10000);
-    return () => clearInterval(interval);
+    
+    // Auto backup every 5 minutes
+    const backupInterval = setInterval(() => {
+        triggerAutoBackup();
+    }, 5 * 60 * 1000);
+
+    return () => {
+        clearInterval(interval);
+        clearInterval(backupInterval);
+    };
   }, [currentPage]);
 
   const menuItems = [
@@ -64,8 +80,8 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
         {/* Sidebar Header - Static */}
         <div className="flex items-center justify-between p-6 border-b border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
-             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/30">S</div>
-             <span className="font-bold text-lg tracking-tight">Billboard Suite</span>
+             <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded flex items-center justify-center font-bold text-lg shadow-lg shadow-blue-500/30">D</div>
+             <span className="font-bold text-lg tracking-tight">Dreambox Ads</span>
           </div>
           <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-slate-400 hover:text-white">
             <X size={24} />
@@ -113,9 +129,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
            </div>
            
            <div className="flex items-center justify-between text-[10px] text-slate-500 bg-slate-800/50 py-1.5 px-3 rounded-full border border-slate-800">
-              <span className="flex items-center gap-1.5"><Radio size={10} className="text-green-500 animate-pulse"/> Live System</span>
-              <span className="font-mono">v1.4.1</span>
+              <span className="flex items-center gap-1.5"><Radio size={10} className="text-green-500 animate-pulse"/> Live</span>
+              <span className="font-mono">v1.4.3</span>
            </div>
+           <p className="text-[9px] text-slate-600 text-center mt-3">Made for Dreambox Advertising<br/>by Spiritus Systems</p>
         </div>
       </aside>
 
