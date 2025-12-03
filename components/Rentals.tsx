@@ -54,7 +54,7 @@ export const Rentals: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
 
   const [newRental, setNewRental] = useState({
-    clientId: '', billboardId: '', side: 'A' as 'A' | 'B', slotNumber: 1, startDate: '', endDate: '', 
+    clientId: '', billboardId: '', side: 'A' as 'A' | 'B' | 'Both', slotNumber: 1, startDate: '', endDate: '', 
     monthlyRate: 0, installationCost: 0, printingCost: 0, hasVat: true
   });
 
@@ -65,9 +65,12 @@ export const Rentals: React.FC = () => {
 
   const selectedBillboard = getBillboard(newRental.billboardId);
 
-  const isSideAvailable = (side: 'A' | 'B', billboard = selectedBillboard) => {
+  const isSideAvailable = (side: 'A' | 'B' | 'Both', billboard = selectedBillboard) => {
     if (!billboard) return false;
     if (billboard.type !== BillboardType.Static) return false;
+    if (side === 'Both') {
+        return billboard.sideAStatus === 'Available' && billboard.sideBStatus === 'Available';
+    }
     return side === 'A' ? billboard.sideAStatus === 'Available' : billboard.sideBStatus === 'Available';
   };
 
@@ -75,10 +78,11 @@ export const Rentals: React.FC = () => {
     if (selectedBillboard?.type === BillboardType.Static) {
         const aFree = selectedBillboard.sideAStatus === 'Available';
         const bFree = selectedBillboard.sideBStatus === 'Available';
-        let autoSide: 'A' | 'B' = 'A';
+        let autoSide: 'A' | 'B' | 'Both' = 'A';
         let rate = 0;
 
-        if (aFree) { autoSide = 'A'; rate = selectedBillboard.sideARate || 0; } 
+        if (aFree && bFree) { autoSide = 'Both'; rate = (selectedBillboard.sideARate || 0) + (selectedBillboard.sideBRate || 0); }
+        else if (aFree) { autoSide = 'A'; rate = selectedBillboard.sideARate || 0; } 
         else if (bFree) { autoSide = 'B'; rate = selectedBillboard.sideBRate || 0; } 
         else { rate = 0; }
 
@@ -92,7 +96,7 @@ export const Rentals: React.FC = () => {
     e.preventDefault();
     if (selectedBillboard?.type === BillboardType.Static) {
         if (!isSideAvailable(newRental.side)) {
-            alert(`Side ${newRental.side} is no longer available.`);
+            alert(`Selected side option (${newRental.side}) is no longer available.`);
             return;
         }
     }
@@ -101,6 +105,13 @@ export const Rentals: React.FC = () => {
     const vat = newRental.hasVat ? subtotal * VAT_RATE : 0;
     const rentalId = `C-${Date.now().toString().slice(-4)}`;
     
+    let detailText = '';
+    if (selectedBillboard?.type === BillboardType.Static) {
+        detailText = newRental.side === 'Both' ? "Sides A & B" : `Side ${newRental.side}`;
+    } else {
+        detailText = `Slot ${newRental.slotNumber}`;
+    }
+
     const rental: Contract = {
         id: rentalId,
         clientId: newRental.clientId,
@@ -115,7 +126,7 @@ export const Rentals: React.FC = () => {
         status: 'Active',
         side: selectedBillboard?.type === BillboardType.Static ? newRental.side : undefined,
         slotNumber: selectedBillboard?.type === BillboardType.LED ? newRental.slotNumber : undefined,
-        details: selectedBillboard?.type === BillboardType.Static ? `Side ${newRental.side}` : `Slot ${newRental.slotNumber}`
+        details: detailText
     };
 
     addContract(rental);
@@ -240,15 +251,19 @@ export const Rentals: React.FC = () => {
 
                         {selectedBillboard?.type === BillboardType.Static && (
                              <div className="flex gap-4">
-                                {(['A', 'B'] as const).map(side => {
+                                {(['A', 'B', 'Both'] as const).map(side => {
                                     const available = isSideAvailable(side);
-                                    const price = side === 'A' ? selectedBillboard.sideARate : selectedBillboard.sideBRate;
+                                    let price = 0;
+                                    if(side === 'A') price = selectedBillboard.sideARate || 0;
+                                    else if(side === 'B') price = selectedBillboard.sideBRate || 0;
+                                    else price = (selectedBillboard.sideARate || 0) + (selectedBillboard.sideBRate || 0);
+
                                     const isSelected = newRental.side === side;
                                     return (
                                         <label key={side} className={`flex-1 relative cursor-pointer border rounded-xl p-3 text-center transition-all ${!available ? 'opacity-40 bg-slate-100 cursor-not-allowed border-slate-100' : isSelected ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 shadow-sm' : 'border-slate-200 hover:border-slate-300'}`}>
-                                            <input type="radio" name="side" className="hidden" disabled={!available} checked={isSelected} onChange={() => available && setNewRental({...newRental, side, monthlyRate: price || 0})} />
-                                            <div className="font-bold text-slate-800">Side {side}</div>
-                                            <div className="text-xs text-slate-500">${price}</div>
+                                            <input type="radio" name="side" className="hidden" disabled={!available} checked={isSelected} onChange={() => available && setNewRental({...newRental, side, monthlyRate: price})} />
+                                            <div className="font-bold text-slate-800">{side === 'Both' ? 'Both A&B' : `Side ${side}`}</div>
+                                            <div className="text-xs text-slate-500">${price.toLocaleString()}</div>
                                             {!available && <div className="text-[10px] text-red-500 font-bold uppercase mt-1">Occupied</div>}
                                             {isSelected && <div className="absolute top-2 right-2 text-blue-500"><CheckCircle size={14}/></div>}
                                         </label>

@@ -77,7 +77,7 @@ export interface Contract {
   
   // Specific Tracking
   slotNumber?: number; 
-  side?: 'A' | 'B'; 
+  side?: 'A' | 'B' | 'Both'; 
 }
 
 export interface Invoice {

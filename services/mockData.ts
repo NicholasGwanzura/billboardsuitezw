@@ -325,7 +325,14 @@ export const addContract = (contract: Contract) => {
     if (billboard) {
         let updated = { ...billboard };
         if (billboard.type === BillboardType.Static && contract.side) {
-            if (contract.side === 'A') { updated.sideAStatus = 'Rented'; updated.sideAClientId = contract.clientId; } else { updated.sideBStatus = 'Rented'; updated.sideBClientId = contract.clientId; }
+            if (contract.side === 'Both') {
+                updated.sideAStatus = 'Rented'; updated.sideAClientId = contract.clientId;
+                updated.sideBStatus = 'Rented'; updated.sideBClientId = contract.clientId;
+            } else if (contract.side === 'A') { 
+                updated.sideAStatus = 'Rented'; updated.sideAClientId = contract.clientId; 
+            } else { 
+                updated.sideBStatus = 'Rented'; updated.sideBClientId = contract.clientId; 
+            }
         } else if (billboard.type === BillboardType.LED) { updated.rentedSlots = (updated.rentedSlots || 0) + 1; }
         updateBillboard(updated); 
     }
@@ -340,7 +347,14 @@ export const deleteContract = (id: string) => {
         if (billboard) {
              let updated = { ...billboard };
              if (billboard.type === BillboardType.Static && target.side) {
-                 if (target.side === 'A') { updated.sideAStatus = 'Available'; updated.sideAClientId = undefined; } else { updated.sideBStatus = 'Available'; updated.sideBClientId = undefined; }
+                 if (target.side === 'Both') {
+                    updated.sideAStatus = 'Available'; updated.sideAClientId = undefined;
+                    updated.sideBStatus = 'Available'; updated.sideBClientId = undefined;
+                 } else if (target.side === 'A') { 
+                    updated.sideAStatus = 'Available'; updated.sideAClientId = undefined; 
+                 } else { 
+                    updated.sideBStatus = 'Available'; updated.sideBClientId = undefined; 
+                 }
              } else if (billboard.type === BillboardType.LED) { updated.rentedSlots = Math.max(0, (updated.rentedSlots || 0) - 1); }
              updateBillboard(updated);
         }
