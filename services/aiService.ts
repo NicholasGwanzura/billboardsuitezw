@@ -1,3 +1,5 @@
+
+
 import { GoogleGenAI } from "@google/genai";
 import { Billboard, Client } from "../types";
 
@@ -50,15 +52,21 @@ export const generateRentalProposal = async (client: Client, billboard: Billboar
 };
 
 export const analyzeBusinessData = async (dataContext: string): Promise<string> => {
-    if (!ai) return "AI Analysis unavailable. Please configure API Key.";
+    if (!ai) return "AI Analysis unavailable. Please check your API Key configuration.";
 
     try {
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: `You are a business analyst for a Billboard Company. Analyze this data and give 3 bullet points of strategic advice: ${dataContext}`,
+            contents: `You are Spiritus AI, a highly intelligent business analyst for a Billboard Advertising company. 
+            Analyze the provided data context and answer the user's specific question. 
+            If the user asks for a summary, provide a concise strategic overview.
+            If the user asks a specific question (e.g., "How is Harare doing?"), use the data to answer specifically.
+            Keep the tone professional, encouraging, and data-driven. Keep the answer under 50 words unless asked for more detail.
+            
+            Data Context: ${dataContext}`,
         });
-        return response.text || "No insights available.";
+        return response.text || "I couldn't analyze the data at this moment.";
     } catch (e) {
-        return "Could not generate insights.";
+        return "Could not generate insights due to network or API limits.";
     }
 }

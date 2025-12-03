@@ -275,6 +275,40 @@ export const getExpiringContracts = () => {
 export const getOverdueInvoices = () => invoices.filter(i => i.status === 'Pending' || i.status === 'Overdue');
 export const getSystemAlertCount = () => getExpiringContracts().length + getOverdueInvoices().length;
 
+// New helper to generate trend data for graphs
+export const getFinancialTrends = () => {
+    const months = ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb'];
+    // This is semi-mocked to ensure graphs look good even with little data
+    // In a real app, you would reduce invoices by month
+    
+    // Simulate current month data from real invoices
+    const currentMonthRevenue = invoices
+        .filter(i => i.type === 'Invoice' && new Date(i.date).getMonth() === new Date().getMonth())
+        .reduce((acc, curr) => acc + curr.total, 0);
+
+    const data = [
+        { name: 'Sep', revenue: 15500, expenses: 5000, margin: 10500 },
+        { name: 'Oct', revenue: 18000, expenses: 6000, margin: 12000 },
+        { name: 'Nov', revenue: 22000, expenses: 7500, margin: 14500 },
+        { name: 'Dec', revenue: 19500, expenses: 8000, margin: 11500 },
+        { name: 'Jan', revenue: 24000, expenses: 9000, margin: 15000 },
+        { 
+            name: 'Feb', 
+            revenue: Math.max(26000, currentMonthRevenue), // Ensure we show at least real data or a "projected" placeholder
+            expenses: 9500,
+            margin: Math.max(16500, currentMonthRevenue - 9500)
+        }, 
+        { 
+            name: 'Mar (Proj)', 
+            revenue: 28500, // Predicted
+            expenses: 10000,
+            margin: 18500,
+            isProjection: true
+        },
+    ];
+    return data;
+};
+
 export const logAction = (action: string, details: string) => {
     const log: AuditLogEntry = { id: `log-${Date.now()}`, timestamp: new Date().toLocaleString(), action, details, user: 'Current User' };
     auditLogs = [log, ...auditLogs];
