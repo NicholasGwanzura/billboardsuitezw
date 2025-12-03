@@ -1,11 +1,24 @@
-import React, { useState } from 'react';
-import { mockContracts, mockClients, mockBillboards } from '../services/mockData';
+
+import React, { useState, useEffect } from 'react';
+import { mockContracts, mockClients, mockBillboards, getContracts } from '../services/mockData';
 import { generateContractPDF } from '../services/pdfGenerator';
 import { Contract } from '../types';
 import { FileText, Calendar, CheckCircle, AlertCircle, Printer, Wrench, Download, X, Eye, Clock, Plus as PlusIcon } from 'lucide-react';
 
 export const ContractList: React.FC = () => {
   const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+  const [contracts, setContracts] = useState<Contract[]>(mockContracts);
+
+  // Poll for updates every 2 seconds to ensure list is in sync if added from another tab or component
+  useEffect(() => {
+      const interval = setInterval(() => {
+          const freshData = getContracts();
+          if (freshData.length !== contracts.length) {
+              setContracts(freshData);
+          }
+      }, 2000);
+      return () => clearInterval(interval);
+  }, [contracts.length]);
 
   const getClient = (id: string) => mockClients.find(c => c.id === id);
   const getClientName = (id: string) => getClient(id)?.companyName || 'Unknown';
@@ -44,7 +57,7 @@ export const ContractList: React.FC = () => {
       <div className="space-y-8 animate-fade-in">
         <div className="flex justify-between items-center"><div><h2 className="text-4xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-slate-900 to-slate-600 mb-2">Contracts</h2><p className="text-slate-500 font-medium">Active agreements, billing cycles, and rental history</p></div><button className="bg-slate-900 text-white px-5 py-3 rounded-full text-sm font-bold uppercase tracking-wider hover:bg-slate-800 shadow-lg hover:shadow-xl transition-all hover:scale-105 flex items-center gap-2"><PlusIcon size={18} /> New Contract</button></div>
         <div className="grid gap-4">
-          {mockContracts.map(contract => (
+          {contracts.map(contract => (
             <div key={contract.id} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-xl transition-all flex flex-col md:flex-row items-start md:items-center justify-between gap-6 group">
               <div className="flex items-start gap-5"><div className="p-4 bg-indigo-50 rounded-2xl group-hover:bg-indigo-600 transition-colors group-hover:text-white text-indigo-600"><FileText className="w-6 h-6" /></div><div><h3 className="font-bold text-slate-900 text-lg">{getClientName(contract.clientId)}</h3><div className="flex items-center gap-2 text-sm text-slate-500 mt-1"><span className="font-medium text-slate-700">{getBillboardName(contract.billboardId)}</span><span className="text-slate-300">•</span><span className={`font-bold px-2 py-0.5 rounded text-xs ${contract.side === 'A' || contract.side === 'B' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}`}>{contract.details}</span></div><div className="flex items-center gap-3 mt-3 text-xs text-slate-400 uppercase tracking-wide font-medium flex-wrap"><span className="flex items-center gap-1"><Calendar size={12} /> {contract.startDate} — {contract.endDate}</span><span className="flex items-center gap-1 text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-100 shadow-sm" title="Monthly Billing Cycle"><Clock size={12} /> Bill Day: {getBillingDayDisplay(contract)}</span><span>ID: {contract.id}</span></div></div></div>
               <div className="flex flex-col md:items-end gap-1 w-full md:w-auto pl-16 md:pl-0"><div className="flex items-center gap-2"><span className="text-sm text-slate-400 font-medium">Total Value:</span><span className="text-2xl font-bold text-slate-900 tracking-tight">${contract.totalContractValue.toLocaleString()}</span></div><div className="flex gap-2 text-[10px] text-slate-500 uppercase tracking-wide">{contract.monthlyRate > 0 && <span>${contract.monthlyRate}/mo</span>}{contract.installationCost > 0 && <span className="flex items-center gap-1 text-slate-400">+ Install</span>}{contract.printingCost > 0 && <span className="flex items-center gap-1 text-slate-400">+ Print</span>}{contract.hasVat && <span className="text-slate-400">+ VAT</span>}</div></div>

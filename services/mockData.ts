@@ -7,29 +7,41 @@ export const ZIM_TOWNS = [
   "Masvingo", "Chinhoyi", "Marondera", "Kadoma", "Victoria Falls", "Beitbridge", "Zvishavane", "Bindura", "Chitungwiza"
 ];
 
+// FULL 22-ITEM INVENTORY (21 Static + 1 LED)
 const INITIAL_BILLBOARDS: Billboard[] = [
-    {
-        id: "1", name: "Airport Rd H-Frame", location: "Airport Rd", town: "Harare", type: BillboardType.Static,
-        width: 12, height: 4, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available',
-        coordinates: { lat: -17.892, lng: 31.105 }, 
-        imageUrl: "https://images.unsplash.com/photo-1622675363311-ac97f3a9a6c1?auto=format&fit=crop&q=80&w=800",
-        visibility: "High-traffic route to R.G. Mugabe International Airport. Captures business travelers, tourists, and executive decision-makers."
-    },
-    {
-        id: "2", name: "Airport & George Rd", location: "Airport Rd & George Rd", town: "Harare", type: BillboardType.Static,
-        width: 6, height: 7, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available',
-        coordinates: { lat: -17.885, lng: 31.098 }, 
-        imageUrl: "https://images.unsplash.com/photo-1562512684-25cb974cb30b?auto=format&fit=crop&q=80&w=800",
-        visibility: "Strategic intersection capturing traffic heading towards the industrial sites and airport. High dwell time during peak hours."
-    },
-    // ... [Truncated for brevity, keeping original Initial Billboards logic] ...
-    {
-        id: "23", name: "Oldlock LED Digital", location: "Borrowdale", town: "Harare", type: BillboardType.LED,
-        width: 3, height: 2, ratePerSlot: 650, totalSlots: 10, rentedSlots: 0,
-        coordinates: { lat: -17.750, lng: 31.085 }, 
-        imageUrl: "https://images.unsplash.com/photo-1588614959060-4d144f28b207?auto=format&fit=crop&q=80&w=800",
-        visibility: "Premium digital screen in the affluent Borrowdale area. Targets high-net-worth individuals and shoppers."
-    }
+  // Harare (5)
+  { id: "1", name: "Airport Rd H-Frame", location: "Airport Rd", town: "Harare", type: BillboardType.Static, width: 12, height: 4, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.892, lng: 31.105 }, imageUrl: "https://images.unsplash.com/photo-1622675363311-ac97f3a9a6c1?auto=format&fit=crop&q=80&w=800", visibility: "High-traffic route to Airport." },
+  { id: "2", name: "Airport & George Rd", location: "Airport & George Rd", town: "Harare", type: BillboardType.Static, width: 6, height: 7, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.885, lng: 31.098 }, imageUrl: "https://images.unsplash.com/photo-1562512684-25cb974cb30b?auto=format&fit=crop&q=80&w=800", visibility: "Key intersection for industrial traffic." },
+  { id: "3", name: "Samora Machel Spectacular", location: "Samora Machel Ave West", town: "Harare", type: BillboardType.Static, width: 18, height: 6, sideARate: 1200, sideBRate: 1200, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.828, lng: 31.035 }, imageUrl: "https://images.unsplash.com/photo-1572025442646-866d16c84a54?auto=format&fit=crop&q=80&w=800", visibility: "Prime CBD entry route." },
+  { id: "4", name: "Simon Mazorodze Overhead", location: "Simon Mazorodze Rd", town: "Harare", type: BillboardType.Static, width: 12, height: 3, sideARate: 800, sideBRate: 800, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.855, lng: 31.040 }, imageUrl: "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&q=80&w=800", visibility: "Heavy industrial and commuter traffic." },
+  { id: "5", name: "Borrowdale Racecourse", location: "Borrowdale Rd", town: "Harare", type: BillboardType.Static, width: 9, height: 6, sideARate: 950, sideBRate: 950, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.775, lng: 31.085 }, imageUrl: "https://images.unsplash.com/photo-1552084117-5635e80c8dd0?auto=format&fit=crop&q=80&w=800", visibility: "Affluent demographic target." },
+  
+  // Bulawayo (3)
+  { id: "6", name: "Jason Moyo Center", location: "Jason Moyo St", town: "Bulawayo", type: BillboardType.Static, width: 6, height: 3, sideARate: 400, sideBRate: 400, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.155, lng: 28.580 }, imageUrl: "https://images.unsplash.com/photo-1585155967849-91c73652e4d9?auto=format&fit=crop&q=80&w=800", visibility: "Bulawayo CBD heart." },
+  { id: "7", name: "Robert Mugabe Way", location: "Robert Mugabe Way", town: "Bulawayo", type: BillboardType.Static, width: 12, height: 4, sideARate: 500, sideBRate: 500, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.160, lng: 28.585 }, imageUrl: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&q=80&w=800", visibility: "Main arterial route." },
+  { id: "8", name: "Ascot Shopping Ctr", location: "Ascot", town: "Bulawayo", type: BillboardType.Static, width: 4, height: 8, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.145, lng: 28.600 }, imageUrl: "https://images.unsplash.com/photo-1541535650810-10d26f5c2ab3?auto=format&fit=crop&q=80&w=800", visibility: "Near shopping center." },
+
+  // Mutare (2)
+  { id: "9", name: "Christmas Pass", location: "Harare-Mutare Hwy", town: "Mutare", type: BillboardType.Static, width: 12, height: 4, sideARate: 450, sideBRate: 450, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.950, lng: 32.630 }, imageUrl: "https://images.unsplash.com/photo-1532619675605-1ede6c2ed2b0?auto=format&fit=crop&q=80&w=800", visibility: "Scenic entry to Mutare." },
+  { id: "10", name: "Herbert Chitepo St", location: "CBD", town: "Mutare", type: BillboardType.Static, width: 6, height: 3, sideARate: 350, sideBRate: 350, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.970, lng: 32.670 }, imageUrl: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=800", visibility: "City center traffic." },
+
+  // Gweru (2)
+  { id: "11", name: "Gweru Flyover", location: "Gweru Main Flyover", town: "Gweru", type: BillboardType.Static, width: 10, height: 4, sideARate: 400, sideBRate: 400, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -19.450, lng: 29.820 }, imageUrl: "https://images.unsplash.com/photo-1557804506-669a67965ba0?auto=format&fit=crop&q=80&w=800", visibility: "High visibility on flyover." },
+  { id: "12", name: "Main Street Gweru", location: "Main St", town: "Gweru", type: BillboardType.Static, width: 6, height: 3, sideARate: 300, sideBRate: 300, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -19.458, lng: 29.815 }, imageUrl: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80&w=800", visibility: "Pedestrian heavy." },
+
+  // Others
+  { id: "13", name: "Masvingo Highway", location: "Entry from Harare", town: "Masvingo", type: BillboardType.Static, width: 12, height: 3, sideARate: 400, sideBRate: 400, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.060, lng: 30.820 }, imageUrl: "https://images.unsplash.com/photo-1534536281715-e28d76689b4d?auto=format&fit=crop&q=80&w=800", visibility: "Great Zimbabwe tourist route." },
+  { id: "14", name: "Chinhoyi Caves", location: "Caves Turn-off", town: "Chinhoyi", type: BillboardType.Static, width: 9, height: 3, sideARate: 350, sideBRate: 350, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.350, lng: 30.180 }, imageUrl: "https://images.unsplash.com/photo-1523966211575-eb4a63459bf1?auto=format&fit=crop&q=80&w=800", visibility: "Tourist traffic." },
+  { id: "15", name: "Vic Falls Airport Rd", location: "Airport Rd", town: "Victoria Falls", type: BillboardType.Static, width: 10, height: 4, sideARate: 600, sideBRate: 600, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.080, lng: 25.840 }, imageUrl: "https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800", visibility: "International tourist target." },
+  { id: "16", name: "Beitbridge Border", location: "Border Post Entry", town: "Beitbridge", type: BillboardType.Static, width: 12, height: 4, sideARate: 550, sideBRate: 550, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -22.210, lng: 29.990 }, imageUrl: "https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=800", visibility: "High cross-border traffic." },
+  { id: "17", name: "Kadoma CBD", location: "City Center", town: "Kadoma", type: BillboardType.Static, width: 6, height: 3, sideARate: 300, sideBRate: 300, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.330, lng: 29.910 }, imageUrl: "https://images.unsplash.com/photo-1580674684081-7617fbf3d745?auto=format&fit=crop&q=80&w=800", visibility: "Gold mining hub." },
+  { id: "18", name: "Marondera Main", location: "Main Rd", town: "Marondera", type: BillboardType.Static, width: 6, height: 3, sideARate: 300, sideBRate: 300, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.190, lng: 31.550 }, imageUrl: "https://images.unsplash.com/photo-1582650625119-3a31f8fa2699?auto=format&fit=crop&q=80&w=800", visibility: "Education hub traffic." },
+  { id: "19", name: "Kwekwe CBD", location: "Main St", town: "Kwekwe", type: BillboardType.Static, width: 6, height: 3, sideARate: 350, sideBRate: 350, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -18.920, lng: 29.810 }, imageUrl: "https://images.unsplash.com/photo-1596701062351-8c2c14d1fdd0?auto=format&fit=crop&q=80&w=800", visibility: "Industrial center." },
+  { id: "20", name: "Bindura Highway", location: "Trojan Mine Rd", town: "Bindura", type: BillboardType.Static, width: 9, height: 3, sideARate: 300, sideBRate: 300, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -17.300, lng: 31.330 }, imageUrl: "https://images.unsplash.com/photo-1524253482453-3fed8d2fe12b?auto=format&fit=crop&q=80&w=800", visibility: "Mining traffic." },
+  { id: "21", name: "Zvishavane Mine", location: "Mine Rd", town: "Zvishavane", type: BillboardType.Static, width: 6, height: 3, sideARate: 350, sideBRate: 350, sideAStatus: 'Available', sideBStatus: 'Available', coordinates: { lat: -20.320, lng: 30.060 }, imageUrl: "https://images.unsplash.com/photo-1565514020176-db8b0059b023?auto=format&fit=crop&q=80&w=800", visibility: "Mining heavy route." },
+  
+  // LED
+  { id: "23", name: "Oldlock LED Digital", location: "Borrowdale", town: "Harare", type: BillboardType.LED, width: 3, height: 2, ratePerSlot: 650, totalSlots: 10, rentedSlots: 0, coordinates: { lat: -17.750, lng: 31.085 }, imageUrl: "https://images.unsplash.com/photo-1588614959060-4d144f28b207?auto=format&fit=crop&q=80&w=800", visibility: "Premium digital screen." }
 ];
 
 // --- Persistence Helpers ---
@@ -52,7 +64,8 @@ const STORAGE_KEYS = {
 const loadFromStorage = <T>(key: string, defaultValue: T): T => {
     try {
         const stored = localStorage.getItem(key);
-        return stored ? JSON.parse(stored) : defaultValue;
+        if (stored === null) return defaultValue;
+        return JSON.parse(stored);
     } catch (e) {
         console.error(`Error loading ${key}`, e);
         return defaultValue;
@@ -61,19 +74,32 @@ const loadFromStorage = <T>(key: string, defaultValue: T): T => {
 
 const saveToStorage = (key: string, data: any) => {
     try {
-        localStorage.setItem(key, JSON.stringify(data));
-    } catch (e) {
+        const serialized = JSON.stringify(data);
+        localStorage.setItem(key, serialized);
+    } catch (e: any) {
         console.error(`Error saving ${key}`, e);
-        // If quota exceeded, we might want to alert, but for now we log.
-        if (key === STORAGE_KEYS.LOGO) {
-            alert("Logo image is too large to save. Please use a smaller image.");
+        if (e.name === 'QuotaExceededError' || e.code === 22) {
+            alert("⚠️ Storage Full! Data cannot be saved. Please Download Backup in Settings > Data and then Reset System to free up space.");
+        } else {
+            console.warn("Data save failed. You may be in Incognito mode or disk is full.");
         }
     }
 };
 
+export const getStorageUsage = () => {
+    let total = 0;
+    for (const key in localStorage) {
+        if (localStorage.hasOwnProperty(key) && key.startsWith('bs_')) {
+            total += (localStorage[key].length * 2);
+        }
+    }
+    return (total / 1024).toFixed(2); // KB
+};
+
 // --- Mutable Stores ---
 let billboards: Billboard[] = loadFromStorage(STORAGE_KEYS.BILLBOARDS, []);
-if (billboards.length === 0) {
+if (billboards.length === 0 && !localStorage.getItem(STORAGE_KEYS.BILLBOARDS)) {
+    // Only load defaults if key never existed to prevent overwriting an empty list intentionally created
     billboards = INITIAL_BILLBOARDS;
     saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards);
 }
@@ -129,13 +155,32 @@ export const createSystemBackup = () => {
     saveToStorage(STORAGE_KEYS.LAST_BACKUP, lastBackupDate);
     
     return JSON.stringify({
-        version: '1.4.4',
+        version: '1.4.6',
         timestamp: new Date().toISOString(),
         data: {
             billboards, contracts, clients, invoices, expenses, 
             users, outsourcedBillboards, auditLogs, printingJobs, companyLogo, companyProfile
         }
     }, null, 2);
+};
+
+export const restoreDefaultBillboards = () => {
+    // Add any from INITIAL_BILLBOARDS that are not in current 'billboards' list by ID
+    const currentIds = new Set(billboards.map(b => b.id));
+    let addedCount = 0;
+    
+    INITIAL_BILLBOARDS.forEach(def => {
+        if (!currentIds.has(def.id)) {
+            billboards.push(def);
+            addedCount++;
+        }
+    });
+    
+    if (addedCount > 0) {
+        saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards);
+        logAction('Data Restore', `Restored ${addedCount} missing default billboards.`);
+    }
+    return addedCount;
 };
 
 export const triggerAutoBackup = () => {
@@ -184,55 +229,34 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
-        version: '1.4.4',
+        version: '1.4.6',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        title: 'Inventory Restoration',
+        features: [
+            'Added "Restore Default Inventory" feature to bring back the original 21 billboards if lost.',
+            'Fixed data initialization logic for missing assets.',
+            'Expanded default database to include billboards in Bulawayo, Mutare, Gweru, and more.'
+        ]
+    },
+    {
+        version: '1.4.5',
+        date: '2/22/2026 01:00 PM',
+        title: 'Persistence & Logo Fixes',
+        features: [
+            'Fixed critical data persistence issues.',
+            'Company Logo now saves immediately upon selection.',
+            'Added Storage Usage indicator in Settings.',
+            'Improved list refreshing stability.',
+            'Enhanced error handling for database storage.'
+        ]
+    },
+    {
+        version: '1.4.4',
+        date: '2/22/2026 12:30 PM',
         title: 'Printing Module Fixes',
         features: [
             'Removed hardcoded simulation costs in Printing module.',
-            'Printing analytics now reflect actual real-time data.',
-            'General performance improvements.'
-        ]
-    },
-    {
-        version: '1.4.3',
-        date: '2/22/2026 12:00 PM',
-        title: 'Auto-Backup & Branding Update',
-        features: [
-            'Added Automatic System Backup (Internal Snapshot).',
-            'Manual Backups now record timestamp of last download.',
-            'Fixed Company Logo persistence and size validation.',
-            'Updated Branding to Dreambox Advertising.',
-            'Enhanced Settings save functionality.'
-        ]
-    },
-    {
-        version: '1.4.2',
-        date: '2/22/2026 10:00 AM',
-        title: 'Settings Persistence Fix',
-        features: [
-            'Fixed Company Profile settings not saving',
-            'Implemented Base64 encoding for Logo uploads to ensure persistence across refreshes',
-            'Updated backup engine to include Company Profile data'
-        ]
-    },
-    {
-        version: '1.4.1',
-        date: '2/15/2026 09:30 AM',
-        title: 'Data Integrity & UI Update',
-        features: [
-            'Added Data Backup & Restore functionality',
-            'Fixed Sidebar Menu visibility on smaller screens',
-            'Improved persistence layer stability'
-        ]
-    },
-    {
-        version: '1.4.0',
-        date: '2/01/2026 08:00 AM',
-        title: 'Billing Flexibility Update',
-        features: [
-            'Added Custom Billing Day preference for Clients (1-31)',
-            'Enhanced Client Edit capabilities',
-            'Improved contract billing cycle calculation'
+            'Printing analytics now reflect actual real-time data.'
         ]
     }
 ];
