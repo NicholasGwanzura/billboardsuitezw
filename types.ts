@@ -1,5 +1,4 @@
 
-
 export enum BillboardType {
   Static = 'Static',
   LED = 'LED'
@@ -34,6 +33,20 @@ export interface Billboard {
   ratePerSlot?: number;
   totalSlots?: number;
   rentedSlots?: number;
+
+  // Maintenance
+  lastMaintenanceDate?: string; // ISO Date string
+}
+
+export interface MaintenanceRecord {
+  id: string;
+  billboardId: string;
+  date: string;
+  type: 'Bolt Check' | 'Structural' | 'Electrical' | 'Cleaning' | 'Repair';
+  technician: string;
+  notes: string;
+  cost: number;
+  status: 'Completed' | 'Scheduled';
 }
 
 export interface OutsourcedBillboard {

@@ -11,6 +11,7 @@ import { Settings } from './components/Settings';
 import { OutsourcedList } from './components/OutsourcedList';
 import { Analytics } from './components/Analytics';
 import { Payments } from './components/Payments';
+import { Maintenance } from './components/Maintenance';
 import { Auth } from './components/Auth';
 import { getCurrentUser } from './services/authService';
 
@@ -66,6 +67,7 @@ const App: React.FC = () => {
       case 'payments': return <Payments />;
       case 'clients': return <ClientList />;
       case 'rentals': return <Rentals />;
+      case 'maintenance': return <Maintenance />;
       case 'financials': return <Financials initialTab="Invoices" />;
       case 'receipts': return <Financials initialTab="Receipts" />;
       case 'expenses': return <Expenses />;

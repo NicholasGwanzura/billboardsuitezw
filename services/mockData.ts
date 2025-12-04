@@ -1,5 +1,5 @@
 
-import { Billboard, BillboardType, Client, Contract, Invoice, Expense, User, PrintingJob, OutsourcedBillboard, AuditLogEntry, CompanyProfile, VAT_RATE } from '../types';
+import { Billboard, BillboardType, Client, Contract, Invoice, Expense, User, PrintingJob, OutsourcedBillboard, AuditLogEntry, CompanyProfile, VAT_RATE, MaintenanceRecord } from '../types';
 
 export const ZIM_TOWNS = [
   "Harare", "Bulawayo", "Mutare", "Gweru", "Kwekwe", 
@@ -217,6 +217,7 @@ const STORAGE_KEYS = {
     LOGS: 'bs_logs',
     OUTSOURCED: 'bs_outsourced',
     PRINTING: 'bs_printing',
+    MAINTENANCE: 'bs_maintenance',
     LOGO: 'bs_logo',
     PROFILE: 'bs_company_profile',
     LAST_BACKUP: 'bs_last_backup_meta',
@@ -310,6 +311,7 @@ export let auditLogs: AuditLogEntry[] = loadFromStorage(STORAGE_KEYS.LOGS, [
 ]) || [];
 export let outsourcedBillboards: OutsourcedBillboard[] = loadFromStorage(STORAGE_KEYS.OUTSOURCED, []) || [];
 export let printingJobs: PrintingJob[] = loadFromStorage(STORAGE_KEYS.PRINTING, []) || [];
+export let maintenanceRecords: MaintenanceRecord[] = loadFromStorage(STORAGE_KEYS.MAINTENANCE, []) || [];
 
 const defaultUsers: User[] = [
   { id: '1', firstName: 'Admin', lastName: 'User', role: 'Admin', email: 'admin@spiritus.com', password: 'password' }
@@ -361,7 +363,7 @@ export const createSystemBackup = () => {
         timestamp: new Date().toISOString(),
         data: {
             billboards, contracts, clients, invoices, expenses, 
-            users, outsourcedBillboards, auditLogs, printingJobs, companyLogo, companyProfile
+            users, outsourcedBillboards, auditLogs, printingJobs, maintenanceRecords, companyLogo, companyProfile
         }
     }, null, 2);
 };
@@ -389,7 +391,7 @@ export const triggerAutoBackup = () => {
         timestamp: new Date().toISOString(),
         data: {
             billboards, contracts, clients, invoices, expenses, 
-            users, outsourcedBillboards, auditLogs, printingJobs, companyLogo, companyProfile
+            users, outsourcedBillboards, auditLogs, printingJobs, maintenanceRecords, companyLogo, companyProfile
         }
     };
     saveToStorage(STORAGE_KEYS.AUTO_BACKUP, backupData);
@@ -485,6 +487,7 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
         saveToStorage(STORAGE_KEYS.OUTSOURCED, backup.data.outsourcedBillboards || []);
         saveToStorage(STORAGE_KEYS.LOGS, backup.data.auditLogs || []);
         saveToStorage(STORAGE_KEYS.PRINTING, backup.data.printingJobs || []);
+        saveToStorage(STORAGE_KEYS.MAINTENANCE, backup.data.maintenanceRecords || []);
         saveToStorage(STORAGE_KEYS.LOGO, backup.data.companyLogo || '');
         saveToStorage(STORAGE_KEYS.PROFILE, backup.data.companyProfile || DEFAULT_PROFILE);
 
@@ -497,55 +500,34 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
-        version: '1.5.9',
+        version: '1.7.0',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        title: 'Maintenance Module',
+        features: [
+            'Maintenance Tracking: Dedicated module to log bolt checks, repairs, and cleaning.',
+            'Safety Alerts: Automatic system alerts if a billboard hasn\'t been checked in over 4 months.',
+            'Health Status: Visual indicators (Green/Amber/Red) for fleet maintenance health.',
+            'Integrated Costs: Maintenance costs are now tracked in the records.'
+        ]
+    },
+    {
+        version: '1.6.0',
+        date: '2/22/2026 06:30 PM',
+        title: 'Weather Safety Integration',
+        features: [
+            'Dashboard Widget: Added real-time weather alerts sidebar to monitor field conditions.',
+            'Safety Alerts: Integrated wind and storm warnings for billboard maintenance safety.',
+            'Visual Upgrade: Applied dynamic glassmorphism styling to the new weather component.'
+        ]
+    },
+    {
+        version: '1.5.9',
+        date: '2/22/2026 06:15 PM',
         title: 'Deployment & Stability Build',
         features: [
             'System Preparation: Optimized application state for production deployment.',
             'Enterprise Branding: Finalized "Dreambox Advertising Suite" branding and title configuration.',
             'Release Integrity: Verified data persistence and backup restoration checks for live environment.'
-        ]
-    },
-    {
-        version: '1.5.8',
-        date: '2/22/2026 06:00 PM',
-        title: 'Dreambox Brand Identity Refresh',
-        features: [
-            'UI/UX Overhaul: Updated application color palette to Royal Indigo and Electric Violet to match Dreambox branding.',
-            'Typography: Switched to "Plus Jakarta Sans" for a premium, modern enterprise look.',
-            'Login Redesign: Revamped authentication screens with split-layout visuals and glassmorphism effects.',
-            'Visual Consistency: Standardized gradients, shadows, and component styling across the platform.'
-        ]
-    },
-    {
-        version: '1.5.7',
-        date: '2/22/2026 05:30 PM',
-        title: 'Enhanced Import & Rate Management',
-        features: [
-            'CSV Import Upgrade: Added support for "Agreed Monthly Rate" to override standard billboard card rates during import.',
-            'Payment Schedule Support: Added "Billing Day" column to CSV import for setting client-specific billing preferences automatically.',
-            'Fixed data mapping for imported contracts to ensure accurate financial tracking.'
-        ]
-    },
-    {
-        version: '1.5.6',
-        date: '2/22/2026 05:00 PM',
-        title: 'Bulk Import & Automation',
-        features: [
-            'Bulk Billboard Import: Upload CSV files to add multiple billboards at once.',
-            'Auto-Contract Generation: Automatically create contracts and clients from the imported CSV data.',
-            'Added "Download Template" for easy data formatting.',
-            'Enhanced data validation during import to prevent duplicates.'
-        ]
-    },
-    {
-        version: '1.5.5',
-        date: '2/22/2026 04:30 PM',
-        title: 'Automated Billing Engine',
-        features: [
-            'Automated Invoice Generation: The system now automatically generates monthly rental invoices for active contracts.',
-            'Smart Billing Dates: Invoices are created on the 28th by default, or on the client\'s specific preferred billing day.',
-            'Duplicate Protection: Prevents double-billing for the same contract within the same month.'
         ]
     }
 ];
@@ -559,6 +541,7 @@ export const getAuditLogs = () => auditLogs || [];
 export const getUsers = () => users || [];
 export const getClients = () => clients || [];
 export const getOutsourcedBillboards = () => outsourcedBillboards || [];
+export const getMaintenanceRecords = () => maintenanceRecords || [];
 export const getCompanyLogo = () => companyLogo;
 export const getCompanyProfile = () => companyProfile;
 
@@ -639,8 +622,20 @@ export const getExpiringContracts = () => {
     });
 };
 
+export const getOverdueMaintenance = () => {
+    const today = new Date();
+    const fourMonthsAgo = new Date();
+    fourMonthsAgo.setMonth(today.getMonth() - 4);
+    
+    return billboards.filter(b => {
+        // If never checked, it's overdue
+        if (!b.lastMaintenanceDate) return true;
+        return new Date(b.lastMaintenanceDate) < fourMonthsAgo;
+    });
+};
+
 export const getOverdueInvoices = () => invoices.filter(i => i.status === 'Pending' || i.status === 'Overdue');
-export const getSystemAlertCount = () => getExpiringContracts().length + getOverdueInvoices().length;
+export const getSystemAlertCount = () => getExpiringContracts().length + getOverdueInvoices().length + getOverdueMaintenance().length;
 
 // Generate Dynamic Trend Data based on Actual Invoices
 export const getFinancialTrends = () => {
@@ -730,6 +725,19 @@ export const deleteBillboard = (id: string) => {
         saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
         logAction('Delete Billboard', `Removed ${target.name} from inventory`);
     }
+};
+
+export const addMaintenanceRecord = (record: MaintenanceRecord) => {
+    maintenanceRecords = [record, ...maintenanceRecords];
+    saveToStorage(STORAGE_KEYS.MAINTENANCE, maintenanceRecords);
+    
+    // Update Billboard Last Checked Date
+    const billboard = billboards.find(b => b.id === record.billboardId);
+    if (billboard) {
+        billboard.lastMaintenanceDate = record.date;
+        updateBillboard(billboard);
+    }
+    logAction('Maintenance', `Recorded ${record.type} for Billboard #${record.billboardId}`);
 };
 
 export const addContract = (contract: Contract) => { 
