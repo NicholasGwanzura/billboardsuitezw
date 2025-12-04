@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Billboard, BillboardType } from '../types';
-import { getBillboards, addBillboard, updateBillboard, deleteBillboard, mockClients, ZIM_TOWNS } from '../services/mockData';
-import { MapPin, X, Edit2, Save, Plus, Image as ImageIcon, Map as MapIcon, Grid as GridIcon, Trash2, AlertTriangle, Share2, Eye, EyeOff, Copy, List as ListIcon, Search, Link2 } from 'lucide-react';
+import { Billboard, BillboardType, Client, Contract } from '../types';
+import { getBillboards, addBillboard, updateBillboard, deleteBillboard, mockClients, ZIM_TOWNS, addClient, addContract, getClients, updateClient } from '../services/mockData';
+import { MapPin, X, Edit2, Save, Plus, Image as ImageIcon, Map as MapIcon, Grid as GridIcon, Trash2, AlertTriangle, Share2, Eye, EyeOff, Copy, List as ListIcon, Search, Link2, FileUp, FileDown } from 'lucide-react';
 import L from 'leaflet';
 
 const MinimalInput = ({ label, value, onChange, type = "text", required = false }: any) => (
@@ -109,6 +109,7 @@ export const BillboardList: React.FC = () => {
   const [isClientView, setIsClientView] = useState(false);
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const importInputRef = useRef<HTMLInputElement>(null);
   const [editingBillboard, setEditingBillboard] = useState<Billboard | null>(null);
   const [billboardToDelete, setBillboardToDelete] = useState<Billboard | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -181,6 +182,137 @@ export const BillboardList: React.FC = () => {
   const shareBillboard = (b: Billboard) => { navigator.clipboard.writeText(`Check out this billboard: ${b.name} at ${b.location}`); alert("Copied to clipboard!"); };
   const copyMapLink = () => { navigator.clipboard.writeText("https://app.spiritus.com/map/view/public-share-id-123"); setIsMapShareModalOpen(false); alert("Map link copied!"); };
 
+  const downloadTemplate = () => {
+      const headers = "Name,Location,Town,Type(Static/LED),Width,Height,Card_Rate_A,Card_Rate_B,Latitude,Longitude,Client_Name,Start_Date,End_Date,Side_or_Slot,Agreed_Monthly_Rate,Billing_Day";
+      const example = "Main Airport Rd,Airport Approach,Harare,Static,12,3,500,500,-17.892,31.105,Delta Beverages,2025-01-01,2025-12-31,A,450,25";
+      const csv = `${headers}\n${example}`;
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'billboard_import_template.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  };
+
+  const handleImportBillboards = (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+          const text = event.target?.result as string;
+          const lines = text.split('\n').slice(1); // Skip header
+          let importedCount = 0;
+          let contractsCreated = 0;
+
+          lines.forEach(line => {
+              if (!line.trim()) return;
+              // Simple CSV split (note: does not handle commas inside quotes, assume simple CSV)
+              const cols = line.split(',').map(c => c.trim());
+              if (cols.length < 4) return; // Basic validation
+
+              const [name, location, town, typeStr, width, height, rateA, rateB, lat, lng, clientName, startDate, endDate, sideOrSlot, agreedRate, billingDay] = cols;
+              
+              // 1. Create Billboard
+              const newBoard: Billboard = {
+                  id: `IMP-${Date.now()}-${Math.floor(Math.random()*1000)}`,
+                  name: name || 'Imported Billboard',
+                  location: location || 'Unknown',
+                  town: town || 'Harare',
+                  type: typeStr?.toLowerCase() === 'led' ? BillboardType.LED : BillboardType.Static,
+                  width: Number(width) || 0,
+                  height: Number(height) || 0,
+                  sideARate: Number(rateA) || 0,
+                  sideBRate: Number(rateB) || 0,
+                  ratePerSlot: Number(rateA) || 0, // Fallback reuse column for card rate
+                  totalSlots: 10, // Default
+                  rentedSlots: 0,
+                  coordinates: { lat: Number(lat) || -17.82, lng: Number(lng) || 31.05 },
+                  sideAStatus: 'Available',
+                  sideBStatus: 'Available',
+                  visibility: 'Imported Data'
+              };
+              addBillboard(newBoard);
+              importedCount++;
+
+              // 2. Handle Client & Contract if data exists
+              if (clientName && startDate && endDate) {
+                  // Find or Create Client
+                  const currentClients = getClients();
+                  let client = currentClients.find(c => c.companyName.toLowerCase() === clientName.toLowerCase());
+                  
+                  const preferredBillingDay = billingDay ? parseInt(billingDay, 10) : undefined;
+
+                  if (!client) {
+                      const newClient: Client = {
+                          id: `CLI-${Date.now()}-${Math.floor(Math.random()*1000)}`,
+                          companyName: clientName,
+                          contactPerson: 'Imported Contact',
+                          email: '',
+                          phone: '',
+                          status: 'Active',
+                          billingDay: preferredBillingDay
+                      };
+                      addClient(newClient);
+                      client = newClient;
+                  } else if (preferredBillingDay && client.billingDay !== preferredBillingDay) {
+                      // Update existing client with new billing preference if provided in CSV
+                      updateClient({ ...client, billingDay: preferredBillingDay });
+                  }
+
+                  // Create Contract
+                  const isSideA = sideOrSlot?.toUpperCase() === 'A';
+                  const isSideB = sideOrSlot?.toUpperCase() === 'B';
+                  const isBoth = sideOrSlot?.toUpperCase() === 'BOTH';
+                  
+                  // Determine details and rate
+                  let contractDetails = sideOrSlot || 'Standard';
+                  let monthlyRate = 0;
+
+                  // Use Agreed Monthly Rate if provided, else fall back to Card Rates
+                  if (agreedRate && Number(agreedRate) > 0) {
+                      monthlyRate = Number(agreedRate);
+                  } else {
+                      if (newBoard.type === BillboardType.Static) {
+                          if (isSideA) monthlyRate = newBoard.sideARate || 0;
+                          else if (isSideB) monthlyRate = newBoard.sideBRate || 0;
+                          else if (isBoth) monthlyRate = (newBoard.sideARate || 0) + (newBoard.sideBRate || 0);
+                      } else {
+                          monthlyRate = newBoard.ratePerSlot || 0;
+                      }
+                  }
+
+                  const newContract: Contract = {
+                      id: `CNT-${Date.now()}-${Math.floor(Math.random()*1000)}`,
+                      clientId: client.id,
+                      billboardId: newBoard.id,
+                      startDate: startDate,
+                      endDate: endDate,
+                      monthlyRate: monthlyRate,
+                      installationCost: 0,
+                      printingCost: 0,
+                      hasVat: true,
+                      totalContractValue: monthlyRate * 12, // Approx
+                      status: 'Active',
+                      details: contractDetails,
+                      side: isSideA ? 'A' : isSideB ? 'B' : isBoth ? 'Both' : undefined
+                  };
+                  
+                  // addContract automatically updates the Billboard Status in mockData
+                  addContract(newContract);
+                  contractsCreated++;
+              }
+          });
+
+          setBillboards([...getBillboards()]);
+          alert(`Import Successful!\n• ${importedCount} Billboards added.\n• ${contractsCreated} Contracts created & linked.`);
+          if (importInputRef.current) importInputRef.current.value = '';
+      };
+      reader.readAsText(file);
+  };
+
   return (
     <>
       <div className="space-y-8 relative font-sans h-[calc(100vh-140px)] flex flex-col animate-fade-in">
@@ -197,6 +329,16 @@ export const BillboardList: React.FC = () => {
                     <button onClick={() => setViewMode('list')} className={`p-2.5 rounded-full transition-all ${viewMode === 'list' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`} title="List View"><ListIcon size={18} /></button>
                     <button onClick={() => setViewMode('map')} className={`p-2.5 rounded-full transition-all ${viewMode === 'map' ? 'bg-slate-900 text-white shadow-md' : 'text-slate-400 hover:text-slate-900'}`} title="Map View"><MapIcon size={18} /></button>
                 </div>
+                
+                {/* Import/Export Tools */}
+                <div className="flex bg-white/80 backdrop-blur-sm rounded-full border border-slate-200 p-1 shadow-sm hidden lg:flex">
+                    <button onClick={downloadTemplate} className="p-2.5 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all" title="Download CSV Template"><FileDown size={18}/></button>
+                    <label className="p-2.5 rounded-full text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 transition-all cursor-pointer" title="Import Billboards CSV">
+                        <FileUp size={18}/>
+                        <input type="file" ref={importInputRef} accept=".csv" className="hidden" onChange={handleImportBillboards} />
+                    </label>
+                </div>
+
                 <div className="flex bg-white/80 backdrop-blur-sm rounded-full border border-slate-200 p-1 shadow-sm hidden lg:flex">{(['All', 'Static', 'LED'] as const).map(type => (<button key={type} onClick={() => setFilter(type)} className={`px-5 py-2 text-xs font-bold uppercase tracking-wider rounded-full transition-all duration-300 ${filter === type ? 'bg-slate-100 text-slate-900 shadow-inner' : 'text-slate-500 hover:text-slate-800'}`}>{type}</button>))}</div>
                 <button onClick={() => setIsMapShareModalOpen(true)} className="bg-white text-slate-600 p-3 rounded-full hover:bg-slate-50 border border-slate-200 transition-colors shadow-sm hover:shadow-md" title="Share Map"><Share2 size={20} /></button>
                 <button onClick={() => setIsAddModalOpen(true)} className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white p-3 rounded-full hover:shadow-lg hover:shadow-indigo-500/30 transition-all hover:scale-105 active:scale-95" title="Add Billboard"><Plus size={20} /></button>

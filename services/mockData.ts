@@ -497,35 +497,34 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
-        version: '1.5.5',
+        version: '1.5.7',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        title: 'Enhanced Import & Rate Management',
+        features: [
+            'CSV Import Upgrade: Added support for "Agreed Monthly Rate" to override standard billboard card rates during import.',
+            'Payment Schedule Support: Added "Billing Day" column to CSV import for setting client-specific billing preferences automatically.',
+            'Fixed data mapping for imported contracts to ensure accurate financial tracking.'
+        ]
+    },
+    {
+        version: '1.5.6',
+        date: '2/22/2026 05:00 PM',
+        title: 'Bulk Import & Automation',
+        features: [
+            'Bulk Billboard Import: Upload CSV files to add multiple billboards at once.',
+            'Auto-Contract Generation: Automatically create contracts and clients from the imported CSV data.',
+            'Added "Download Template" for easy data formatting.',
+            'Enhanced data validation during import to prevent duplicates.'
+        ]
+    },
+    {
+        version: '1.5.5',
+        date: '2/22/2026 04:30 PM',
         title: 'Automated Billing Engine',
         features: [
             'Automated Invoice Generation: The system now automatically generates monthly rental invoices for active contracts.',
             'Smart Billing Dates: Invoices are created on the 28th by default, or on the client\'s specific preferred billing day.',
             'Duplicate Protection: Prevents double-billing for the same contract within the same month.'
-        ]
-    },
-    {
-        version: '1.5.4',
-        date: '2/22/2026 04:00 PM',
-        title: 'Auto-Billing & Mobile Optimization',
-        features: [
-            'Added Automatic Invoice Generation for active contracts (triggers on 28th or client billing day).',
-            'Implemented "Catch-up" logic to bill immediately if the system was offline on the billing day.',
-            'Fixed sidebar alignment issues on mobile devices.',
-            'Enhanced responsiveness for modal dialogs and data tables.'
-        ]
-    },
-    {
-        version: '1.5.3',
-        date: '2/22/2026 03:30 PM',
-        title: 'Persistence Engine & Mobile Fixes',
-        features: [
-            'Fixed critical persistence bug: Created Rentals/Clients now persist reliably even after updates.',
-            'Refined Sidebar Layout: Fixed overlapping issues on mobile devices.',
-            'Improved "New Rental" form responsiveness for easier data entry on phones.',
-            'Auto-Merge Logic: Catalogue updates are now additive and do not overwrite your existing data.'
         ]
     }
 ];
