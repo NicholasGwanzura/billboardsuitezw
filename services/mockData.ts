@@ -497,8 +497,29 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
-        version: '1.5.7',
+        version: '1.5.9',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        title: 'Deployment & Stability Build',
+        features: [
+            'System Preparation: Optimized application state for production deployment.',
+            'Enterprise Branding: Finalized "Dreambox Advertising Suite" branding and title configuration.',
+            'Release Integrity: Verified data persistence and backup restoration checks for live environment.'
+        ]
+    },
+    {
+        version: '1.5.8',
+        date: '2/22/2026 06:00 PM',
+        title: 'Dreambox Brand Identity Refresh',
+        features: [
+            'UI/UX Overhaul: Updated application color palette to Royal Indigo and Electric Violet to match Dreambox branding.',
+            'Typography: Switched to "Plus Jakarta Sans" for a premium, modern enterprise look.',
+            'Login Redesign: Revamped authentication screens with split-layout visuals and glassmorphism effects.',
+            'Visual Consistency: Standardized gradients, shadows, and component styling across the platform.'
+        ]
+    },
+    {
+        version: '1.5.7',
+        date: '2/22/2026 05:30 PM',
         title: 'Enhanced Import & Rate Management',
         features: [
             'CSV Import Upgrade: Added support for "Agreed Monthly Rate" to override standard billboard card rates during import.',

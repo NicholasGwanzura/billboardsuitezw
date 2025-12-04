@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Map, Users, FileText, CreditCard, Receipt, Settings as SettingsIcon,
-  Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, Radio, ChevronRight
+  Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, Radio, ChevronRight, Box
 } from 'lucide-react';
 import { getCurrentUser, logout } from '../services/authService';
 import { getSystemAlertCount, triggerAutoBackup, runAutoBilling } from '../services/mockData';
@@ -67,7 +67,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
         />
       )}
 
-      {/* Sidebar - Premium Dark Glass Gradient */}
+      {/* Sidebar - Premium Brand Colors */}
       <aside 
         className={`fixed inset-y-0 left-0 z-[100] w-72 transform transition-transform duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] lg:translate-x-0 lg:relative flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
@@ -75,15 +75,20 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
       >
         {/* Background Gradients for Sidebar */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-[#0f172a] to-slate-950 z-0"></div>
-        <div className="absolute top-0 left-0 w-full h-96 bg-indigo-500/10 blur-[100px] rounded-full z-0 pointer-events-none"></div>
-        <div className="absolute bottom-0 right-0 w-full h-96 bg-blue-500/10 blur-[100px] rounded-full z-0 pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-full h-96 bg-brand-500/10 blur-[100px] rounded-full z-0 pointer-events-none"></div>
+        <div className="absolute bottom-0 right-0 w-full h-96 bg-accent-500/10 blur-[100px] rounded-full z-0 pointer-events-none"></div>
 
-        {/* Sidebar Header */}
+        {/* Sidebar Header - Dreambox Logo */}
         <div className="relative z-10 flex items-center justify-between p-6 shrink-0">
           <div className="flex items-center gap-3 group cursor-pointer">
-             <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center font-bold text-xl text-white shadow-lg shadow-indigo-500/30 group-hover:scale-105 transition-transform duration-300">D</div>
+             <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-accent-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform duration-300">
+                <Box size={20} strokeWidth={3} />
+             </div>
              <div>
-                <span className="font-extrabold text-xl tracking-tight text-white block leading-none">Dreambox</span>
+                <div className="flex items-center">
+                    <span className="font-extrabold text-xl tracking-tight text-white block leading-none">Dream</span>
+                    <span className="font-extrabold text-xl tracking-tight text-white block leading-none">ox</span>
+                </div>
                 <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-medium">Advertising</span>
              </div>
           </div>
@@ -103,15 +108,15 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
                 onClick={() => { onNavigate(item.id); setSidebarOpen(false); }}
                 className={`group flex items-center w-full px-4 py-3.5 rounded-xl text-sm font-medium transition-all duration-300 relative overflow-hidden ${
                   isActive 
-                    ? 'text-white shadow-lg shadow-indigo-900/20' 
+                    ? 'text-white shadow-lg shadow-brand-900/20' 
                     : 'text-slate-400 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {isActive && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600/90 to-violet-600/90 rounded-xl z-0"></div>
+                    <div className="absolute inset-0 bg-gradient-to-r from-brand-600/90 to-accent-600/90 rounded-xl z-0"></div>
                 )}
                 <div className="relative z-10 flex items-center w-full">
-                    <Icon size={20} className={`mr-3 shrink-0 transition-transform duration-300 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-indigo-400 group-hover:scale-110'}`} />
+                    <Icon size={20} className={`mr-3 shrink-0 transition-transform duration-300 ${isActive ? 'text-white' : 'text-slate-500 group-hover:text-brand-400 group-hover:scale-110'}`} />
                     <span className="flex-1 text-left">{item.label}</span>
                     {isActive && <ChevronRight size={16} className="text-white/50 animate-pulse" />}
                 </div>
@@ -127,7 +132,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
                   {user?.firstName?.charAt(0) || 'U'}
               </div>
               <div className="flex-1 min-w-0">
-                 <p className="text-sm font-bold text-white truncate group-hover:text-indigo-300 transition-colors">{user?.firstName || 'User'}</p>
+                 <p className="text-sm font-bold text-white truncate group-hover:text-brand-300 transition-colors">{user?.firstName || 'User'}</p>
                  <p className="text-[10px] text-slate-400 truncate uppercase tracking-wider">{user?.role || 'Guest'}</p>
               </div>
               <button onClick={handleLogout} className="text-slate-500 hover:text-red-400 transition-colors p-2" title="Logout">
@@ -137,7 +142,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
            
            <div className="flex items-center justify-between text-[10px] text-slate-500 py-1 px-1">
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div> System Online</span>
-              <span className="font-mono opacity-50">v1.5.4</span>
+              <span className="font-mono opacity-50">v1.5.7</span>
            </div>
         </div>
       </aside>
@@ -160,10 +165,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
           
           <div className="flex items-center gap-2 sm:gap-4">
              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-white/50 border border-slate-200/60 rounded-full text-xs font-medium text-slate-600 shadow-sm backdrop-blur-sm">
-                <span className="w-2 h-2 rounded-full bg-indigo-500"></span>
+                <span className="w-2 h-2 rounded-full bg-brand-500"></span>
                 <span>Harare, ZW</span>
              </div>
-             <button onClick={() => onNavigate('dashboard')} className="relative p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/50 rounded-full transition-all duration-300 hover:shadow-md" title={`${alertCount} System Alerts`}>
+             <button onClick={() => onNavigate('dashboard')} className="relative p-2 text-slate-500 hover:text-brand-600 hover:bg-brand-50/50 rounded-full transition-all duration-300 hover:shadow-md" title={`${alertCount} System Alerts`}>
                 <Bell size={22} />
                 {alertCount > 0 && (
                     <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-red-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] font-bold text-white shadow-sm">
