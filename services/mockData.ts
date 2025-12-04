@@ -402,6 +402,8 @@ export const runAutoBilling = () => {
     const currentYear = today.getFullYear();
     let generatedCount = 0;
 
+    if (!contracts) return 0;
+
     contracts.forEach(contract => {
         if (contract.status !== 'Active') return;
 
@@ -413,6 +415,7 @@ export const runAutoBilling = () => {
         if (today.getDate() < billDay) return;
 
         // Check if an invoice for this contract ALREADY exists for this month/year
+        // We look for type 'Invoice' linked to this contract
         const alreadyBilled = invoices.some(inv => {
             if (inv.contractId !== contract.id) return false;
             if (inv.type !== 'Invoice') return false; 
@@ -494,8 +497,18 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
-        version: '1.5.4',
+        version: '1.5.5',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        title: 'Automated Billing Engine',
+        features: [
+            'Automated Invoice Generation: The system now automatically generates monthly rental invoices for active contracts.',
+            'Smart Billing Dates: Invoices are created on the 28th by default, or on the client\'s specific preferred billing day.',
+            'Duplicate Protection: Prevents double-billing for the same contract within the same month.'
+        ]
+    },
+    {
+        version: '1.5.4',
+        date: '2/22/2026 04:00 PM',
         title: 'Auto-Billing & Mobile Optimization',
         features: [
             'Added Automatic Invoice Generation for active contracts (triggers on 28th or client billing day).',
@@ -513,16 +526,6 @@ export const RELEASE_NOTES = [
             'Refined Sidebar Layout: Fixed overlapping issues on mobile devices.',
             'Improved "New Rental" form responsiveness for easier data entry on phones.',
             'Auto-Merge Logic: Catalogue updates are now additive and do not overwrite your existing data.'
-        ]
-    },
-    {
-        version: '1.5.2',
-        date: '2/22/2026 03:00 PM',
-        title: 'Persistence & Layout Improvements',
-        features: [
-            'Fixed data persistence issues where new catalogue items were missing for existing users.',
-            'Implemented auto-migration system to safely merge new default data.',
-            'Improved mobile responsiveness for the sidebar and header layout.'
         ]
     }
 ];

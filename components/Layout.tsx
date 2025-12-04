@@ -23,14 +23,16 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
     // Initial checks on mount
     setAlertCount(getSystemAlertCount());
     triggerAutoBackup();
+    
+    // Trigger auto-billing check on load
     runAutoBilling();
 
     // Periodic intervals
     const interval = setInterval(() => setAlertCount(getSystemAlertCount()), 10000);
     const backupInterval = setInterval(() => triggerAutoBackup(), 5 * 60 * 1000);
     
-    // Check billing every hour to catch active day changes without refresh
-    const billingInterval = setInterval(() => runAutoBilling(), 60 * 60 * 1000); 
+    // Check billing every hour (in case app is left open across days)
+    const billingInterval = setInterval(() => runAutoBilling(), 60 * 60 * 1000);
 
     return () => { 
         clearInterval(interval); 
