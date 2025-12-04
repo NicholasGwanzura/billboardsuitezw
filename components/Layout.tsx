@@ -5,7 +5,7 @@ import {
   Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, Radio, ChevronRight
 } from 'lucide-react';
 import { getCurrentUser, logout } from '../services/authService';
-import { getSystemAlertCount, triggerAutoBackup } from '../services/mockData';
+import { getSystemAlertCount, triggerAutoBackup, runAutoBilling } from '../services/mockData';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -20,11 +20,23 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
   const user = getCurrentUser();
 
   useEffect(() => {
+    // Initial checks on mount
     setAlertCount(getSystemAlertCount());
     triggerAutoBackup();
+    runAutoBilling();
+
+    // Periodic intervals
     const interval = setInterval(() => setAlertCount(getSystemAlertCount()), 10000);
     const backupInterval = setInterval(() => triggerAutoBackup(), 5 * 60 * 1000);
-    return () => { clearInterval(interval); clearInterval(backupInterval); };
+    
+    // Check billing every hour to catch active day changes without refresh
+    const billingInterval = setInterval(() => runAutoBilling(), 60 * 60 * 1000); 
+
+    return () => { 
+        clearInterval(interval); 
+        clearInterval(backupInterval);
+        clearInterval(billingInterval);
+    };
   }, [currentPage]);
 
   const menuItems = [
@@ -55,9 +67,9 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
 
       {/* Sidebar - Premium Dark Glass Gradient */}
       <aside 
-        className={`fixed inset-y-0 left-0 z-[100] w-72 transform transition-transform duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] lg:translate-x-0 lg:static flex flex-col ${
+        className={`fixed inset-y-0 left-0 z-[100] w-72 transform transition-transform duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] lg:translate-x-0 lg:relative flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } bg-slate-900 shadow-2xl border-r border-white/5 relative overflow-hidden`}
+        } bg-slate-900 shadow-2xl border-r border-white/5 overflow-hidden`}
       >
         {/* Background Gradients for Sidebar */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-[#0f172a] to-slate-950 z-0"></div>

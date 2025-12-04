@@ -1,5 +1,5 @@
 
-import { Billboard, BillboardType, Client, Contract, Invoice, Expense, User, PrintingJob, OutsourcedBillboard, AuditLogEntry, CompanyProfile } from '../types';
+import { Billboard, BillboardType, Client, Contract, Invoice, Expense, User, PrintingJob, OutsourcedBillboard, AuditLogEntry, CompanyProfile, VAT_RATE } from '../types';
 
 export const ZIM_TOWNS = [
   "Harare", "Bulawayo", "Mutare", "Gweru", "Kwekwe", 
@@ -224,12 +224,10 @@ const STORAGE_KEYS = {
     DATA_VERSION: 'bs_data_version'
 };
 
-// IMPROVED: Strictly distinguish between "key missing" (null) and "data empty" ([])
-// This ensures that if a user deletes all data, we don't force-reload defaults on refresh.
 const loadFromStorage = <T>(key: string, defaultValue: T | null): T | null => {
     try {
         const stored = localStorage.getItem(key);
-        if (stored === null) return defaultValue; // Only return default if key is MISSING (first run)
+        if (stored === null) return defaultValue;
         return JSON.parse(stored);
     } catch (e) {
         console.error(`Error loading ${key}`, e);
@@ -246,7 +244,7 @@ const saveToStorage = (key: string, data: any) => {
         if (e.name === 'QuotaExceededError' || e.code === 22) {
             alert("⚠️ Storage Full! Data cannot be saved. Please Download Backup in Settings > Data and then Reset System to free up space.");
         } else {
-            console.warn("Data save failed. You may be in Incognito mode or disk is full.");
+            console.warn("Data save failed.");
         }
     }
 };
@@ -264,28 +262,24 @@ export const getStorageUsage = () => {
 // --- Mutable Stores & Initialization ---
 
 // 1. Billboards
-let billboards: Billboard[] | null = loadFromStorage(STORAGE_KEYS.BILLBOARDS, null);
-if (billboards === null) {
-    billboards = INITIAL_BILLBOARDS;
+export let billboards: Billboard[] = loadFromStorage(STORAGE_KEYS.BILLBOARDS, null) || INITIAL_BILLBOARDS;
+if (!loadFromStorage(STORAGE_KEYS.BILLBOARDS, null)) {
     saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards);
 }
 
 // 2. Clients
-let clients: Client[] | null = loadFromStorage(STORAGE_KEYS.CLIENTS, null);
-if (clients === null) {
-    clients = INITIAL_CLIENTS;
+export let clients: Client[] = loadFromStorage(STORAGE_KEYS.CLIENTS, null) || INITIAL_CLIENTS;
+if (!loadFromStorage(STORAGE_KEYS.CLIENTS, null)) {
     saveToStorage(STORAGE_KEYS.CLIENTS, clients);
 }
 
 // 3. Contracts
-let contracts: Contract[] | null = loadFromStorage(STORAGE_KEYS.CONTRACTS, null);
-if (contracts === null) {
-    contracts = INITIAL_CONTRACTS;
+export let contracts: Contract[] = loadFromStorage(STORAGE_KEYS.CONTRACTS, null) || INITIAL_CONTRACTS;
+if (!loadFromStorage(STORAGE_KEYS.CONTRACTS, null)) {
     saveToStorage(STORAGE_KEYS.CONTRACTS, contracts);
 }
 
-// Auto-Migration for New Catalogue Items (Non-destructive)
-// We only add items if they are missing from the ID set, we DO NOT reset the list if it's empty.
+// Auto-Migration for New Catalogue Items
 const currentDataVersion = '1.5.3'; 
 const storedVersion = localStorage.getItem(STORAGE_KEYS.DATA_VERSION);
 
@@ -296,7 +290,6 @@ if (storedVersion !== currentDataVersion) {
     const currentBoardIds = new Set((billboards || []).map(b => b.id));
     INITIAL_BILLBOARDS.forEach(def => {
         if (!currentBoardIds.has(def.id)) {
-            if (!billboards) billboards = [];
             billboards.push(def);
             migrated = true;
         }
@@ -309,20 +302,19 @@ if (storedVersion !== currentDataVersion) {
     localStorage.setItem(STORAGE_KEYS.DATA_VERSION, currentDataVersion);
 }
 
-// Load other entities with empty array default if null, as they start empty usually
-let invoices: Invoice[] = loadFromStorage(STORAGE_KEYS.INVOICES, []) || [];
-let expenses: Expense[] = loadFromStorage(STORAGE_KEYS.EXPENSES, []) || [];
-let auditLogs: AuditLogEntry[] = loadFromStorage(STORAGE_KEYS.LOGS, [
+// Load other entities
+export let invoices: Invoice[] = loadFromStorage(STORAGE_KEYS.INVOICES, []) || [];
+export let expenses: Expense[] = loadFromStorage(STORAGE_KEYS.EXPENSES, []) || [];
+export let auditLogs: AuditLogEntry[] = loadFromStorage(STORAGE_KEYS.LOGS, [
     { id: 'log-init', timestamp: new Date().toLocaleString(), action: 'System Init', details: 'System started', user: 'System' }
 ]) || [];
-let outsourcedBillboards: OutsourcedBillboard[] = loadFromStorage(STORAGE_KEYS.OUTSOURCED, []) || [];
-let printingJobs: PrintingJob[] = loadFromStorage(STORAGE_KEYS.PRINTING, []) || [];
+export let outsourcedBillboards: OutsourcedBillboard[] = loadFromStorage(STORAGE_KEYS.OUTSOURCED, []) || [];
+export let printingJobs: PrintingJob[] = loadFromStorage(STORAGE_KEYS.PRINTING, []) || [];
 
 const defaultUsers: User[] = [
   { id: '1', firstName: 'Admin', lastName: 'User', role: 'Admin', email: 'admin@spiritus.com', password: 'password' }
 ];
-let users: User[] = loadFromStorage(STORAGE_KEYS.USERS, null) || defaultUsers;
-// Ensure admin exists if users was null
+export let users: User[] = loadFromStorage(STORAGE_KEYS.USERS, null) || defaultUsers;
 if (!localStorage.getItem(STORAGE_KEYS.USERS)) {
     saveToStorage(STORAGE_KEYS.USERS, users);
 }
@@ -375,13 +367,12 @@ export const createSystemBackup = () => {
 };
 
 export const restoreDefaultBillboards = () => {
-    if (!billboards) billboards = [];
     const currentIds = new Set(billboards.map(b => b.id));
     let addedCount = 0;
     
     INITIAL_BILLBOARDS.forEach(def => {
         if (!currentIds.has(def.id)) {
-            billboards!.push(def);
+            billboards.push(def);
             addedCount++;
         }
     });
@@ -403,6 +394,70 @@ export const triggerAutoBackup = () => {
     };
     saveToStorage(STORAGE_KEYS.AUTO_BACKUP, backupData);
     return new Date().toLocaleString();
+};
+
+export const runAutoBilling = () => {
+    const today = new Date();
+    const currentMonth = today.getMonth();
+    const currentYear = today.getFullYear();
+    let generatedCount = 0;
+
+    contracts.forEach(contract => {
+        if (contract.status !== 'Active') return;
+
+        const client = clients.find(c => c.id === contract.clientId);
+        // Default to 28th if no specific billing day set
+        const billDay = client?.billingDay || 28;
+
+        // If today is before the billing day, do not bill yet
+        if (today.getDate() < billDay) return;
+
+        // Check if an invoice for this contract ALREADY exists for this month/year
+        const alreadyBilled = invoices.some(inv => {
+            if (inv.contractId !== contract.id) return false;
+            if (inv.type !== 'Invoice') return false; 
+            
+            const invDate = new Date(inv.date);
+            return invDate.getMonth() === currentMonth && invDate.getFullYear() === currentYear;
+        });
+
+        if (!alreadyBilled) {
+            const billboard = billboards.find(b => b.id === contract.billboardId);
+            const subtotal = contract.monthlyRate;
+            const vat = contract.hasVat ? subtotal * VAT_RATE : 0;
+            
+            const newInvoice: Invoice = {
+                id: `INV-AUTO-${Date.now().toString().slice(-6)}-${Math.floor(Math.random() * 1000)}`,
+                contractId: contract.id,
+                clientId: contract.clientId,
+                date: today.toISOString().split('T')[0],
+                items: [
+                    { 
+                        description: `Auto-Billing: ${billboard?.name || 'Billboard Rental'} (${contract.details}) - ${today.toLocaleDateString('default', { month: 'long', year: 'numeric' })}`, 
+                        amount: subtotal 
+                    }
+                ],
+                subtotal: subtotal,
+                vatAmount: vat,
+                total: subtotal + vat,
+                status: 'Pending',
+                type: 'Invoice'
+            };
+
+            // Add to invoices array (in-memory)
+            invoices = [newInvoice, ...invoices];
+            generatedCount++;
+        }
+    });
+
+    if (generatedCount > 0) {
+        // Persist
+        saveToStorage(STORAGE_KEYS.INVOICES, invoices);
+        logAction('Auto-Billing', `Generated ${generatedCount} invoices for ${today.toLocaleDateString('default', { month: 'long' })} cycle.`);
+        console.log(`Auto-Billing: Generated ${generatedCount} invoices.`);
+    }
+    
+    return generatedCount;
 };
 
 export const getAutoBackupStatus = () => {
@@ -439,8 +494,19 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
-        version: '1.5.3',
+        version: '1.5.4',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        title: 'Auto-Billing & Mobile Optimization',
+        features: [
+            'Added Automatic Invoice Generation for active contracts (triggers on 28th or client billing day).',
+            'Implemented "Catch-up" logic to bill immediately if the system was offline on the billing day.',
+            'Fixed sidebar alignment issues on mobile devices.',
+            'Enhanced responsiveness for modal dialogs and data tables.'
+        ]
+    },
+    {
+        version: '1.5.3',
+        date: '2/22/2026 03:30 PM',
         title: 'Persistence Engine & Mobile Fixes',
         features: [
             'Fixed critical persistence bug: Created Rentals/Clients now persist reliably even after updates.',
@@ -493,8 +559,8 @@ export const getClientFinancials = (clientId: string) => {
 export const getTransactions = (clientId: string) => invoices.filter(i => i.clientId === clientId && (i.type === 'Invoice' || i.type === 'Receipt')).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
 export const getNextBillingDetails = (clientId: string) => {
-    const client = clients?.find(c => c.id === clientId);
-    const activeContracts = contracts?.filter(c => c.clientId === clientId && c.status === 'Active') || [];
+    const client = clients.find(c => c.id === clientId);
+    const activeContracts = contracts.filter(c => c.clientId === clientId && c.status === 'Active');
     const today = new Date();
     let earliestDate: Date | null = null;
     let totalAmount = 0;
@@ -524,7 +590,7 @@ export const getNextBillingDetails = (clientId: string) => {
 
 export const getUpcomingBillings = () => {
     const results: { clientName: string; date: string; amount: number; day: string }[] = [];
-    clients?.forEach(client => {
+    clients.forEach(client => {
         const details = getNextBillingDetails(client.id);
         if (details && details.date !== 'N/A') {
             const formattedDays = details.days.map(d => {
@@ -537,17 +603,17 @@ export const getUpcomingBillings = () => {
             results.push({ clientName: client.companyName, date: details.date, amount: details.amount, day: formattedDays });
         }
     });
-    return results.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    return results.sort((a, b) => new Date(a.date).getTime() - new Date(a.date).getTime());
 };
 
 export const getExpiringContracts = () => {
     const today = new Date();
     const thirtyDaysOut = new Date();
     thirtyDaysOut.setDate(today.getDate() + 30);
-    return contracts?.filter(c => {
+    return contracts.filter(c => {
         const endDate = new Date(c.endDate);
         return endDate >= today && endDate <= thirtyDaysOut && c.status === 'Active';
-    }) || [];
+    });
 };
 
 export const getOverdueInvoices = () => invoices.filter(i => i.status === 'Pending' || i.status === 'Overdue');
@@ -602,8 +668,7 @@ export const getFinancialTrends = () => {
     // Add a projection for next month based on active contracts
     const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
     const activeContractRevenue = contracts
-        ? contracts.filter(c => c.status === 'Active').reduce((acc, c) => acc + c.monthlyRate, 0)
-        : 0;
+        .filter(c => c.status === 'Active').reduce((acc, c) => acc + c.monthlyRate, 0);
     
     // Estimate expenses based on average of last 3 months
     const avgExpenses = result.slice(-3).reduce((acc, curr) => acc + curr.expenses, 0) / 3 || 0;
@@ -626,87 +691,105 @@ export const logAction = (action: string, details: string) => {
 };
 
 export const addBillboard = (billboard: Billboard) => { 
-    if(!billboards) billboards = [];
     billboards = [...billboards, billboard]; 
     saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
     logAction('Create Billboard', `Added ${billboard.name} (${billboard.type})`); 
 };
 export const updateBillboard = (updated: Billboard) => { 
-    if(!billboards) return;
     billboards = billboards.map(b => b.id === updated.id ? updated : b); 
     saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
     logAction('Update Billboard', `Updated details for ${updated.name}`); 
 };
 export const deleteBillboard = (id: string) => { 
-    if(!billboards) return;
     const target = billboards.find(b => b.id === id); 
     if (target) { 
         billboards = billboards.filter(b => b.id !== id); 
         saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
-        logAction('Delete Billboard', `Removed ${target.name} from inventory`); 
-    } 
-};
-export const addContract = (contract: Contract) => {
-    if(!contracts) contracts = [];
-    contracts = [...contracts, contract];
-    saveToStorage(STORAGE_KEYS.CONTRACTS, contracts);
-    if(billboards) {
-        const billboard = billboards.find(b => b.id === contract.billboardId);
-        if (billboard) {
-            let updated = { ...billboard };
-            if (billboard.type === BillboardType.Static && contract.side) {
-                if (contract.side === 'Both') {
-                    updated.sideAStatus = 'Rented'; updated.sideAClientId = contract.clientId;
-                    updated.sideBStatus = 'Rented'; updated.sideBClientId = contract.clientId;
-                } else if (contract.side === 'A') { 
-                    updated.sideAStatus = 'Rented'; updated.sideAClientId = contract.clientId; 
-                } else { 
-                    updated.sideBStatus = 'Rented'; updated.sideBClientId = contract.clientId; 
-                }
-            } else if (billboard.type === BillboardType.LED) { updated.rentedSlots = (updated.rentedSlots || 0) + 1; }
-            updateBillboard(updated); 
-        }
+        logAction('Delete Billboard', `Removed ${target.name} from inventory`);
     }
-    logAction('Create Contract', `New contract ${contract.id} for ${contract.details}`);
 };
+
+export const addContract = (contract: Contract) => { 
+    contracts = [...contracts, contract]; 
+    saveToStorage(STORAGE_KEYS.CONTRACTS, contracts); 
+    
+    // Update Billboard Status if Static
+    const billboard = billboards.find(b => b.id === contract.billboardId);
+    if(billboard) {
+        if(billboard.type === BillboardType.Static) {
+            if(contract.side === 'A' || contract.details.includes('Side A')) billboard.sideAStatus = 'Rented';
+            if(contract.side === 'B' || contract.details.includes('Side B')) billboard.sideBStatus = 'Rented';
+            if(contract.side === 'Both') { billboard.sideAStatus = 'Rented'; billboard.sideBStatus = 'Rented'; }
+            if(contract.details.includes('Side A') && contract.clientId) billboard.sideAClientId = contract.clientId;
+            if(contract.details.includes('Side B') && contract.clientId) billboard.sideBClientId = contract.clientId;
+        } else if (billboard.type === BillboardType.LED) {
+            billboard.rentedSlots = (billboard.rentedSlots || 0) + 1;
+        }
+        updateBillboard(billboard);
+    }
+    logAction('Create Contract', `New contract for ${contract.billboardId}`); 
+};
+
 export const deleteContract = (id: string) => {
-    if(!contracts) return;
-    const target = contracts.find(c => c.id === id);
-    if (target) {
+    const contract = contracts.find(c => c.id === id);
+    if(contract) {
         contracts = contracts.filter(c => c.id !== id);
         saveToStorage(STORAGE_KEYS.CONTRACTS, contracts);
-        if(billboards) {
-            const billboard = billboards.find(b => b.id === target.billboardId);
-            if (billboard) {
-                let updated = { ...billboard };
-                if (billboard.type === BillboardType.Static && target.side) {
-                    if (target.side === 'Both') {
-                        updated.sideAStatus = 'Available'; updated.sideAClientId = undefined;
-                        updated.sideBStatus = 'Available'; updated.sideBClientId = undefined;
-                    } else if (target.side === 'A') { 
-                        updated.sideAStatus = 'Available'; updated.sideAClientId = undefined; 
-                    } else { 
-                        updated.sideBStatus = 'Available'; updated.sideBClientId = undefined; 
-                    }
-                } else if (billboard.type === BillboardType.LED) { updated.rentedSlots = Math.max(0, (updated.rentedSlots || 0) - 1); }
-                updateBillboard(updated);
+        
+        // Free up the billboard
+        const billboard = billboards.find(b => b.id === contract.billboardId);
+        if(billboard) {
+            if(billboard.type === BillboardType.Static) {
+                if(contract.side === 'A' || contract.details.includes('Side A')) { billboard.sideAStatus = 'Available'; billboard.sideAClientId = undefined; }
+                if(contract.side === 'B' || contract.details.includes('Side B')) { billboard.sideBStatus = 'Available'; billboard.sideBClientId = undefined; }
+                if(contract.side === 'Both') { 
+                    billboard.sideAStatus = 'Available'; billboard.sideBStatus = 'Available'; 
+                    billboard.sideAClientId = undefined; billboard.sideBClientId = undefined;
+                }
+            } else if(billboard.type === BillboardType.LED) {
+                billboard.rentedSlots = Math.max(0, (billboard.rentedSlots || 0) - 1);
             }
+            updateBillboard(billboard);
         }
         logAction('Delete Contract', `Removed contract ${id}`);
     }
-}
-export const addInvoice = (invoice: Invoice) => { if (!invoice.id) invoice.id = `INV-${Date.now()}`; invoices = [...invoices, invoice]; saveToStorage(STORAGE_KEYS.INVOICES, invoices); logAction('Generate Financial', `Created ${invoice.type} #${invoice.id} for $${invoice.total}`); };
-export const markInvoiceAsPaid = (id: string) => { invoices = invoices.map(inv => inv.id === id ? { ...inv, status: 'Paid' } : inv); saveToStorage(STORAGE_KEYS.INVOICES, invoices); logAction('Payment Received', `Marked Invoice #${id} as Paid`); };
-export const updateInvoiceStatus = (id: string, status: 'Paid' | 'Pending' | 'Overdue') => { invoices = invoices.map(inv => inv.id === id ? { ...inv, status } : inv); saveToStorage(STORAGE_KEYS.INVOICES, invoices); };
-export const addUser = (user: User) => { users = [...users, user]; saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Management', `Added new user: ${user.firstName} ${user.lastName}`); };
-export const updateUser = (updatedUser: User) => { users = users.map(u => u.id === updatedUser.id ? updatedUser : u); saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Management', `Updated user details: ${updatedUser.firstName} ${updatedUser.lastName}`); };
-export const deleteUser = (id: string) => { const target = users.find(u => u.id === id); if (target) { users = users.filter(u => u.id !== id); saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Management', `Deleted user: ${target.firstName} ${target.lastName}`); } };
-export const addClient = (client: Client) => { if(!clients) clients=[]; clients = [...clients, client]; saveToStorage(STORAGE_KEYS.CLIENTS, clients); logAction('Client Management', `Registered client: ${client.companyName}`); };
-export const updateClient = (updated: Client) => { if(!clients) return; clients = clients.map(c => c.id === updated.id ? updated : c); saveToStorage(STORAGE_KEYS.CLIENTS, clients); logAction('Client Management', `Updated client details: ${updated.companyName}`); };
-export const deleteClient = (id: string) => { if(!clients) return; const target = clients.find(c => c.id === id); if(target) { clients = clients.filter(c => c.id !== id); saveToStorage(STORAGE_KEYS.CLIENTS, clients); logAction('Client Management', `Deleted client: ${target.companyName}`); } };
-export const addExpense = (expense: Expense) => { expenses = [...expenses, expense]; saveToStorage(STORAGE_KEYS.EXPENSES, expenses); logAction('Expense Tracking', `Recorded ${expense.category} expense: $${expense.amount}`); }
-export const addOutsourcedBillboard = (billboard: OutsourcedBillboard) => { outsourcedBillboards = [...outsourcedBillboards, billboard]; saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); logAction('Outsourced', `Assigned outsourced billboard: ${billboard.id}`); };
-export const updateOutsourcedBillboard = (updated: OutsourcedBillboard) => { outsourcedBillboards = outsourcedBillboards.map(b => b.id === updated.id ? updated : b); saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); logAction('Outsourced', `Updated outsourced billboard: ${updated.id}`); };
-export const deleteOutsourcedBillboard = (id: string) => { const target = outsourcedBillboards.find(b => b.id === id); if(target) { outsourcedBillboards = outsourcedBillboards.filter(b => b.id !== id); saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); logAction('Outsourced', `Deleted outsourced assignment: ${id}`); } };
-export let mockPrintingJobs: PrintingJob[] = printingJobs;
-export { billboards as mockBillboards, contracts as mockContracts, invoices as mockInvoices, expenses as mockExpenses, clients as mockClients, users as mockUsers, outsourcedBillboards as mockOutsourcedBillboards };
+};
+
+export const addInvoice = (invoice: Invoice) => { invoices = [invoice, ...invoices]; saveToStorage(STORAGE_KEYS.INVOICES, invoices); logAction('Create Invoice', `Created ${invoice.type} #${invoice.id} ($${invoice.total})`); };
+export const markInvoiceAsPaid = (id: string) => { invoices = invoices.map(i => i.id === id ? { ...i, status: 'Paid' } : i); saveToStorage(STORAGE_KEYS.INVOICES, invoices); logAction('Payment', `Marked Invoice #${id} as Paid`); };
+export const addExpense = (expense: Expense) => { expenses = [expense, ...expenses]; saveToStorage(STORAGE_KEYS.EXPENSES, expenses); logAction('Expense', `Recorded expense: ${expense.description} ($${expense.amount})`); };
+export const addClient = (client: Client) => { 
+    clients = [...clients, client]; 
+    saveToStorage(STORAGE_KEYS.CLIENTS, clients); 
+    logAction('Create Client', `Added ${client.companyName}`); 
+};
+export const updateClient = (updated: Client) => {
+    clients = clients.map(c => c.id === updated.id ? updated : c);
+    saveToStorage(STORAGE_KEYS.CLIENTS, clients);
+    logAction('Update Client', `Updated info for ${updated.companyName}`);
+};
+export const deleteClient = (id: string) => { 
+    const target = clients.find(c => c.id === id); 
+    if (target) { 
+        clients = clients.filter(c => c.id !== id); 
+        saveToStorage(STORAGE_KEYS.CLIENTS, clients); 
+        logAction('Delete Client', `Removed ${target.companyName}`); 
+    }
+};
+export const addUser = (user: User) => { users = [...users, user]; saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Added user ${user.email}`); };
+export const updateUser = (updated: User) => { users = users.map(u => u.id === updated.id ? updated : u); saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Updated user ${updated.email}`); };
+export const deleteUser = (id: string) => { users = users.filter(u => u.id !== id); saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Deleted user ID ${id}`); };
+export const addOutsourcedBillboard = (b: OutsourcedBillboard) => { outsourcedBillboards = [...outsourcedBillboards, b]; saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); logAction('Outsourcing', `Added outsourced unit ${b.billboardId}`); };
+export const updateOutsourcedBillboard = (updated: OutsourcedBillboard) => { outsourcedBillboards = outsourcedBillboards.map(b => b.id === updated.id ? updated : b); saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); };
+export const deleteOutsourcedBillboard = (id: string) => { outsourcedBillboards = outsourcedBillboards.filter(b => b.id !== id); saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); };
+
+// Aliases for compatibility
+export { 
+  billboards as mockBillboards,
+  clients as mockClients,
+  contracts as mockContracts,
+  invoices as mockInvoices,
+  expenses as mockExpenses,
+  printingJobs as mockPrintingJobs,
+  outsourcedBillboards as mockOutsourcedBillboards
+};

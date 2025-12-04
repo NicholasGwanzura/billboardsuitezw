@@ -250,77 +250,80 @@ export const Rentals: React.FC = () => {
       </div>
 
       {isCreateModalOpen && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all overflow-y-auto">
-            <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-4xl w-full border border-white/20 my-8">
-                <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 sticky top-0 z-10">
-                    <h3 className="text-xl font-bold text-slate-900">New Rental Agreement</h3>
-                    <button onClick={() => setIsCreateModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button>
-                </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2">
-                    <form onSubmit={handleCreateRental} className="p-6 sm:p-8 space-y-6 sm:space-y-8 border-r border-slate-100">
-                        <div className="space-y-6">
-                            <MinimalSelect label="Select Client" value={newRental.clientId} onChange={(e: any) => setNewRental({...newRental, clientId: e.target.value})} options={[{value: '', label: 'Select Client...'}, ...mockClients.map(c => ({value: c.id, label: c.companyName}))]} />
-                            <MinimalSelect label="Select Billboard" value={newRental.billboardId} onChange={(e: any) => { setNewRental(prev => ({...prev, billboardId: e.target.value})); }} options={[{value: '', label: 'Select Billboard...'}, ...getBillboards().map(b => ({value: b.id, label: `${b.name} (${b.type})`}))]} />
-                        </div>
+        <div className="fixed inset-0 z-[200] overflow-y-auto">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onClick={() => setIsCreateModalOpen(false)} />
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div className="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 w-full max-w-4xl border border-white/20">
+                    <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white/50 sticky top-0 z-10">
+                        <h3 className="text-xl font-bold text-slate-900">New Rental Agreement</h3>
+                        <button onClick={() => setIsCreateModalOpen(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} className="text-slate-400" /></button>
+                    </div>
+                    <div className="grid grid-cols-1 lg:grid-cols-2">
+                        <form onSubmit={handleCreateRental} className="p-6 sm:p-8 space-y-6 sm:space-y-8 border-r border-slate-100">
+                            <div className="space-y-6">
+                                <MinimalSelect label="Select Client" value={newRental.clientId} onChange={(e: any) => setNewRental({...newRental, clientId: e.target.value})} options={[{value: '', label: 'Select Client...'}, ...mockClients.map(c => ({value: c.id, label: c.companyName}))]} />
+                                <MinimalSelect label="Select Billboard" value={newRental.billboardId} onChange={(e: any) => { setNewRental(prev => ({...prev, billboardId: e.target.value})); }} options={[{value: '', label: 'Select Billboard...'}, ...getBillboards().map(b => ({value: b.id, label: `${b.name} (${b.type})`}))]} />
+                            </div>
 
-                        {selectedBillboard?.type === BillboardType.Static && (
-                             <div className="flex flex-col sm:flex-row gap-4">
-                                {(['A', 'B', 'Both'] as const).map(side => {
-                                    const available = isSideAvailable(side);
-                                    let price = 0;
-                                    if(side === 'A') price = selectedBillboard.sideARate || 0;
-                                    else if(side === 'B') price = selectedBillboard.sideBRate || 0;
-                                    else price = (selectedBillboard.sideARate || 0) + (selectedBillboard.sideBRate || 0);
+                            {selectedBillboard?.type === BillboardType.Static && (
+                                <div className="flex flex-col sm:flex-row gap-4">
+                                    {(['A', 'B', 'Both'] as const).map(side => {
+                                        const available = isSideAvailable(side);
+                                        let price = 0;
+                                        if(side === 'A') price = selectedBillboard.sideARate || 0;
+                                        else if(side === 'B') price = selectedBillboard.sideBRate || 0;
+                                        else price = (selectedBillboard.sideARate || 0) + (selectedBillboard.sideBRate || 0);
 
-                                    const isSelected = newRental.side === side;
-                                    return (
-                                        <label key={side} className={`flex-1 relative cursor-pointer border rounded-xl p-3 text-center transition-all ${!available ? 'opacity-40 bg-slate-100 cursor-not-allowed border-slate-100' : isSelected ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 shadow-sm' : 'border-slate-200 hover:border-slate-300'}`}>
-                                            <input type="radio" name="side" className="hidden" disabled={!available} checked={isSelected} onChange={() => available && setNewRental({...newRental, side, monthlyRate: price})} />
-                                            <div className="font-bold text-slate-800">{side === 'Both' ? 'Both A&B' : `Side ${side}`}</div>
-                                            <div className="text-xs text-slate-500">${price.toLocaleString()}</div>
-                                            {!available && <div className="text-[10px] text-red-500 font-bold uppercase mt-1">Occupied</div>}
-                                            {isSelected && <div className="absolute top-2 right-2 text-blue-500"><CheckCircle size={14}/></div>}
-                                        </label>
-                                    )
-                                })}
-                             </div>
-                        )}
-                        {selectedBillboard?.type === BillboardType.LED && (
-                            <MinimalSelect label="Select Slot" value={newRental.slotNumber} onChange={(e: any) => setNewRental({...newRental, slotNumber: Number(e.target.value)})} options={Array.from({length: selectedBillboard.totalSlots || 10}, (_, i) => ({value: i+1, label: `Slot ${i+1}`}))} />
-                        )}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                            <MinimalInput label="Start Date" type="date" value={newRental.startDate} onChange={(e: any) => setNewRental({...newRental, startDate: e.target.value})} required />
-                            <MinimalInput label="End Date" type="date" value={newRental.endDate} onChange={(e: any) => setNewRental({...newRental, endDate: e.target.value})} required />
-                        </div>
-                        <div className="bg-slate-50 p-6 rounded-2xl space-y-6">
-                            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Financials</h4>
+                                        const isSelected = newRental.side === side;
+                                        return (
+                                            <label key={side} className={`flex-1 relative cursor-pointer border rounded-xl p-3 text-center transition-all ${!available ? 'opacity-40 bg-slate-100 cursor-not-allowed border-slate-100' : isSelected ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-500 shadow-sm' : 'border-slate-200 hover:border-slate-300'}`}>
+                                                <input type="radio" name="side" className="hidden" disabled={!available} checked={isSelected} onChange={() => available && setNewRental({...newRental, side, monthlyRate: price})} />
+                                                <div className="font-bold text-slate-800">{side === 'Both' ? 'Both A&B' : `Side ${side}`}</div>
+                                                <div className="text-xs text-slate-500">${price.toLocaleString()}</div>
+                                                {!available && <div className="text-[10px] text-red-500 font-bold uppercase mt-1">Occupied</div>}
+                                                {isSelected && <div className="absolute top-2 right-2 text-blue-500"><CheckCircle size={14}/></div>}
+                                            </label>
+                                        )
+                                    })}
+                                </div>
+                            )}
+                            {selectedBillboard?.type === BillboardType.LED && (
+                                <MinimalSelect label="Select Slot" value={newRental.slotNumber} onChange={(e: any) => setNewRental({...newRental, slotNumber: Number(e.target.value)})} options={Array.from({length: selectedBillboard.totalSlots || 10}, (_, i) => ({value: i+1, label: `Slot ${i+1}`}))} />
+                            )}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <MinimalInput label="Monthly Rate ($)" type="number" value={newRental.monthlyRate} onChange={(e: any) => setNewRental({...newRental, monthlyRate: Number(e.target.value)})} />
-                                <MinimalInput label="Install Fee ($)" type="number" value={newRental.installationCost} onChange={(e: any) => setNewRental({...newRental, installationCost: Number(e.target.value)})} />
+                                <MinimalInput label="Start Date" type="date" value={newRental.startDate} onChange={(e: any) => setNewRental({...newRental, startDate: e.target.value})} required />
+                                <MinimalInput label="End Date" type="date" value={newRental.endDate} onChange={(e: any) => setNewRental({...newRental, endDate: e.target.value})} required />
                             </div>
-                            <div className="flex items-center gap-2">
-                                <input type="checkbox" checked={newRental.hasVat} onChange={e => setNewRental({...newRental, hasVat: e.target.checked})} className="rounded border-slate-300 text-slate-900 focus:ring-slate-900"/>
-                                <label className="text-sm font-medium text-slate-600">Include VAT (15%)</label>
+                            <div className="bg-slate-50 p-6 rounded-2xl space-y-6">
+                                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">Financials</h4>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                    <MinimalInput label="Monthly Rate ($)" type="number" value={newRental.monthlyRate} onChange={(e: any) => setNewRental({...newRental, monthlyRate: Number(e.target.value)})} />
+                                    <MinimalInput label="Install Fee ($)" type="number" value={newRental.installationCost} onChange={(e: any) => setNewRental({...newRental, installationCost: Number(e.target.value)})} />
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <input type="checkbox" checked={newRental.hasVat} onChange={e => setNewRental({...newRental, hasVat: e.target.checked})} className="rounded border-slate-300 text-slate-900 focus:ring-slate-900"/>
+                                    <label className="text-sm font-medium text-slate-600">Include VAT (15%)</label>
+                                </div>
                             </div>
-                        </div>
-                        <button type="submit" className="w-full py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all hover:scale-[1.02]">
-                             Generate Contract & Invoice
-                        </button>
-                    </form>
-                    <div className="p-8 bg-slate-50/50 flex flex-col">
-                        <div className="flex items-center gap-2 mb-4">
-                            <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><Wand2 size={20}/></div>
-                            <div>
-                                <h4 className="font-bold text-slate-800">AI Proposal Draft</h4>
-                                <p className="text-xs text-slate-500">Generate a pitch email for this rental</p>
+                            <button type="submit" className="w-full py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all hover:scale-[1.02]">
+                                Generate Contract & Invoice
+                            </button>
+                        </form>
+                        <div className="p-8 bg-slate-50/50 flex flex-col">
+                            <div className="flex items-center gap-2 mb-4">
+                                <div className="p-2 bg-purple-100 rounded-lg text-purple-600"><Wand2 size={20}/></div>
+                                <div>
+                                    <h4 className="font-bold text-slate-800">AI Proposal Draft</h4>
+                                    <p className="text-xs text-slate-500">Generate a pitch email for this rental</p>
+                                </div>
                             </div>
+                            <div className="flex-1 bg-white rounded-xl border border-slate-200 p-4 shadow-inner mb-4 overflow-y-auto min-h-[200px] text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
+                                {aiProposal || "Select a client and billboard, then click 'Generate' to create a professional pitch draft..."}
+                            </div>
+                            <button type="button" onClick={handleGenerateProposal} disabled={isGenerating} className="w-full py-3 bg-white border border-slate-200 text-slate-700 font-bold uppercase tracking-wider rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                                {isGenerating ? <RefreshCw size={16} className="animate-spin"/> : <Wand2 size={16} />} {isGenerating ? 'Drafting...' : 'Generate Proposal'}
+                            </button>
                         </div>
-                        <div className="flex-1 bg-white rounded-xl border border-slate-200 p-4 shadow-inner mb-4 overflow-y-auto min-h-[200px] text-sm text-slate-600 whitespace-pre-wrap leading-relaxed">
-                            {aiProposal || "Select a client and billboard, then click 'Generate' to create a professional pitch draft..."}
-                        </div>
-                        <button type="button" onClick={handleGenerateProposal} disabled={isGenerating} className="w-full py-3 bg-white border border-slate-200 text-slate-700 font-bold uppercase tracking-wider rounded-xl hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
-                            {isGenerating ? <RefreshCw size={16} className="animate-spin"/> : <Wand2 size={16} />} {isGenerating ? 'Drafting...' : 'Generate Proposal'}
-                        </button>
                     </div>
                 </div>
             </div>
@@ -328,19 +331,22 @@ export const Rentals: React.FC = () => {
       )}
 
       {rentalToDelete && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all">
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-sm w-full border border-white/20 p-6 text-center">
-             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50">
-                <AlertTriangle className="text-red-500" size={32} />
-             </div>
-             <h3 className="text-xl font-bold text-slate-900 mb-2">Delete Rental?</h3>
-             <p className="text-slate-500 mb-6 text-sm">
-               Are you sure you want to delete the rental agreement for <span className="font-bold text-slate-700">{getClientName(rentalToDelete.clientId)}</span>?
-             </p>
-             <div className="flex gap-3">
-               <button onClick={() => setRentalToDelete(null)} className="flex-1 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors">Cancel</button>
-               <button onClick={confirmDelete} className="flex-1 py-3 text-white bg-red-500 hover:bg-red-600 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors shadow-lg shadow-red-500/30">Delete</button>
-             </div>
+        <div className="fixed inset-0 z-[200] overflow-y-auto">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onClick={() => setRentalToDelete(null)} />
+          <div className="flex min-h-full items-center justify-center p-4 text-center">
+              <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-sm border border-white/20 p-6 text-center">
+                 <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50">
+                    <AlertTriangle className="text-red-500" size={32} />
+                 </div>
+                 <h3 className="text-xl font-bold text-slate-900 mb-2">Delete Rental?</h3>
+                 <p className="text-slate-500 mb-6 text-sm">
+                   Are you sure you want to delete the rental agreement for <span className="font-bold text-slate-700">{getClientName(rentalToDelete.clientId)}</span>?
+                 </p>
+                 <div className="flex gap-3">
+                   <button onClick={() => setRentalToDelete(null)} className="flex-1 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors">Cancel</button>
+                   <button onClick={confirmDelete} className="flex-1 py-3 text-white bg-red-500 hover:bg-red-600 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors shadow-lg shadow-red-500/30">Delete</button>
+                 </div>
+              </div>
           </div>
         </div>
       )}

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Client } from '../types';
 import { getClients, addClient, deleteClient, updateClient, getNextBillingDetails } from '../services/mockData';
@@ -91,12 +92,79 @@ export const ClientList: React.FC = () => {
       </div>
       
       {/* Create Modal */}
-      {isAddModalOpen && (<div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all overflow-y-auto"><div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-md w-full border border-white/20 my-8"><div className="p-6 border-b border-slate-100 flex justify-between items-center"><h3 className="text-xl font-bold text-slate-900">Add New Client</h3><button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button></div><form onSubmit={handleAddClient} className="p-8 space-y-8"><MinimalInput label="Company Name" value={newClient.companyName} onChange={(e: any) => setNewClient({...newClient, companyName: e.target.value})} required /><MinimalInput label="Contact Person" value={newClient.contactPerson} onChange={(e: any) => setNewClient({...newClient, contactPerson: e.target.value})} required /><MinimalInput label="Email Address" type="email" value={newClient.email} onChange={(e: any) => setNewClient({...newClient, email: e.target.value})} required /><div className="grid grid-cols-2 gap-6"><MinimalInput label="Phone Number" type="tel" value={newClient.phone} onChange={(e: any) => setNewClient({...newClient, phone: e.target.value})} /><MinimalInput label="Billing Day (1-31)" type="number" min={1} max={31} value={newClient.billingDay || ''} onChange={(e: any) => setNewClient({...newClient, billingDay: e.target.value ? Number(e.target.value) : undefined})} /></div><button type="submit" className="w-full px-4 py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all hover:scale-105"><Save size={18} /> Save Client</button></form></div></div>)}
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-[200] overflow-y-auto">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onClick={() => setIsAddModalOpen(false)} />
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div className="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-md border border-white/20">
+                    <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                        <h3 className="text-xl font-bold text-slate-900">Add New Client</h3>
+                        <button onClick={() => setIsAddModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button>
+                    </div>
+                    <form onSubmit={handleAddClient} className="p-8 space-y-8">
+                        <MinimalInput label="Company Name" value={newClient.companyName} onChange={(e: any) => setNewClient({...newClient, companyName: e.target.value})} required />
+                        <MinimalInput label="Contact Person" value={newClient.contactPerson} onChange={(e: any) => setNewClient({...newClient, contactPerson: e.target.value})} required />
+                        <MinimalInput label="Email Address" type="email" value={newClient.email} onChange={(e: any) => setNewClient({...newClient, email: e.target.value})} required />
+                        <div className="grid grid-cols-2 gap-6">
+                            <MinimalInput label="Phone Number" type="tel" value={newClient.phone} onChange={(e: any) => setNewClient({...newClient, phone: e.target.value})} />
+                            <MinimalInput label="Billing Day (1-31)" type="number" min={1} max={31} value={newClient.billingDay || ''} onChange={(e: any) => setNewClient({...newClient, billingDay: e.target.value ? Number(e.target.value) : undefined})} />
+                        </div>
+                        <button type="submit" className="w-full px-4 py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all hover:scale-105"><Save size={18} /> Save Client</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+      )}
       
       {/* Edit Modal */}
-      {editingClient && (<div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all overflow-y-auto"><div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl max-w-lg w-full border border-white/20 my-8"><div className="p-6 border-b border-slate-100 flex justify-between items-center"><h3 className="text-xl font-bold text-slate-900">Edit Client Details</h3><button onClick={() => setEditingClient(null)} className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button></div><form onSubmit={handleUpdateClient} className="p-8 space-y-8"><div className="space-y-6"><MinimalInput label="Company Name" value={editingClient.companyName} onChange={(e: any) => setEditingClient({...editingClient, companyName: e.target.value})} required /><MinimalInput label="Contact Person" value={editingClient.contactPerson} onChange={(e: any) => setEditingClient({...editingClient, contactPerson: e.target.value})} required /><div className="grid grid-cols-2 gap-6"><MinimalInput label="Email Address" type="email" value={editingClient.email} onChange={(e: any) => setEditingClient({...editingClient, email: e.target.value})} required /><MinimalInput label="Phone Number" type="tel" value={editingClient.phone} onChange={(e: any) => setEditingClient({...editingClient, phone: e.target.value})} /></div></div><div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4"><div className="flex items-center gap-2 mb-2"><CreditCard className="text-slate-400" size={18} /><h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Billing Preferences</h4></div><div className="grid grid-cols-1 gap-6"><MinimalInput label="Preferred Billing Day (1-31)" type="number" min={1} max={31} value={editingClient.billingDay || ''} onChange={(e: any) => setEditingClient({...editingClient, billingDay: e.target.value ? Number(e.target.value) : undefined})} placeholder="Default: Contract Start Date" /><p className="text-xs text-slate-400 leading-relaxed">Setting a fixed billing day (e.g., 25th) will consolidate all invoices for this client to be generated on this day of the month, overriding individual contract start dates.</p></div></div><button type="submit" className="w-full px-4 py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all hover:scale-105"><Save size={18} /> Update Client</button></form></div></div>)}
+      {editingClient && (
+        <div className="fixed inset-0 z-[200] overflow-y-auto">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onClick={() => setEditingClient(null)} />
+            <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div className="relative transform overflow-hidden rounded-3xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-lg border border-white/20">
+                    <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10">
+                        <h3 className="text-xl font-bold text-slate-900">Edit Client Details</h3>
+                        <button onClick={() => setEditingClient(null)} className="text-slate-400 hover:text-slate-600 p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button>
+                    </div>
+                    <form onSubmit={handleUpdateClient} className="p-8 space-y-8">
+                        <div className="space-y-6">
+                            <MinimalInput label="Company Name" value={editingClient.companyName} onChange={(e: any) => setEditingClient({...editingClient, companyName: e.target.value})} required />
+                            <MinimalInput label="Contact Person" value={editingClient.contactPerson} onChange={(e: any) => setEditingClient({...editingClient, contactPerson: e.target.value})} required />
+                            <div className="grid grid-cols-2 gap-6">
+                                <MinimalInput label="Email Address" type="email" value={editingClient.email} onChange={(e: any) => setEditingClient({...editingClient, email: e.target.value})} required />
+                                <MinimalInput label="Phone Number" type="tel" value={editingClient.phone} onChange={(e: any) => setEditingClient({...editingClient, phone: e.target.value})} />
+                            </div>
+                        </div>
+                        <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100 space-y-4">
+                            <div className="flex items-center gap-2 mb-2"><CreditCard className="text-slate-400" size={18} /><h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Billing Preferences</h4></div>
+                            <div className="grid grid-cols-1 gap-6">
+                                <MinimalInput label="Preferred Billing Day (1-31)" type="number" min={1} max={31} value={editingClient.billingDay || ''} onChange={(e: any) => setEditingClient({...editingClient, billingDay: e.target.value ? Number(e.target.value) : undefined})} placeholder="Default: Contract Start Date" />
+                                <p className="text-xs text-slate-400 leading-relaxed">Setting a fixed billing day (e.g., 25th) will consolidate all invoices for this client to be generated on this day of the month, overriding individual contract start dates.</p>
+                            </div>
+                        </div>
+                        <button type="submit" className="w-full px-4 py-4 text-white bg-slate-900 rounded-xl hover:bg-slate-800 flex items-center justify-center gap-2 shadow-xl font-bold uppercase tracking-wider transition-all hover:scale-105"><Save size={18} /> Update Client</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+      )}
 
-      {clientToDelete && (<div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center z-50 p-4 transition-all"><div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl max-w-sm w-full border border-white/20 p-6 text-center"><div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50"><AlertTriangle className="text-red-500" size={32} /></div><h3 className="text-xl font-bold text-slate-900 mb-2">Delete Client?</h3><p className="text-slate-500 mb-6 text-sm">Are you sure you want to delete <span className="font-bold text-slate-700">{clientToDelete.companyName}</span>? This action cannot be undone.</p><div className="flex gap-3"><button onClick={() => setClientToDelete(null)} className="flex-1 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors">Cancel</button><button onClick={handleConfirmDelete} className="flex-1 py-3 text-white bg-red-500 hover:bg-red-600 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors shadow-lg shadow-red-500/30">Delete</button></div></div></div>)}
+      {clientToDelete && (
+        <div className="fixed inset-0 z-[200] overflow-y-auto">
+            <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity" onClick={() => setClientToDelete(null)} />
+            <div className="flex min-h-full items-center justify-center p-4 text-center">
+                <div className="relative transform overflow-hidden rounded-2xl bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-sm border border-white/20 p-6 text-center">
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-red-50"><AlertTriangle className="text-red-500" size={32} /></div>
+                    <h3 className="text-xl font-bold text-slate-900 mb-2">Delete Client?</h3>
+                    <p className="text-slate-500 mb-6 text-sm">Are you sure you want to delete <span className="font-bold text-slate-700">{clientToDelete.companyName}</span>? This action cannot be undone.</p>
+                    <div className="flex gap-3">
+                        <button onClick={() => setClientToDelete(null)} className="flex-1 py-3 text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors">Cancel</button>
+                        <button onClick={handleConfirmDelete} className="flex-1 py-3 text-white bg-red-500 hover:bg-red-600 rounded-xl font-bold uppercase text-xs tracking-wider transition-colors shadow-lg shadow-red-500/30">Delete</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
     </>
   );
 };
