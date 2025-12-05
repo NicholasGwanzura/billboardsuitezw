@@ -3,22 +3,29 @@ import React, { useState, useEffect } from 'react';
 import { getClients, getInvoices, getClientFinancials, getTransactions, getContracts, getBillboards, addInvoice, markInvoiceAsPaid, getUpcomingBillings } from '../services/mockData';
 import { generateStatementPDF } from '../services/pdfGenerator';
 import { Client, Invoice } from '../types';
-import { DollarSign, FileText, Download, CheckCircle, AlertCircle, Search, CreditCard, X, Check, Filter, Hash, Wallet, Building, Clock, Calendar } from 'lucide-react';
+import { CheckCircle, AlertCircle, Search, CreditCard, X, Check, Clock, Calendar, Wallet, Hash, Download } from 'lucide-react';
 
-const MinimalInput = ({ label, value, onChange, type = "text", required = false, placeholder = "", icon: Icon }: any) => (
-    <div className="group relative pt-6">
-      <div className="absolute top-9 left-0 text-slate-400">{Icon && <Icon size={18} />}</div>
-      <input type={type} required={required} value={value} onChange={onChange} placeholder={placeholder || " "} className={`peer w-full py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium placeholder-transparent focus:placeholder-slate-300 ${Icon ? 'pl-8' : 'px-0'}`} />
-      <label className={`absolute left-0 top-1 text-xs text-slate-400 font-medium transition-all uppercase tracking-wide peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-9 peer-focus:top-1 peer-focus:text-xs peer-focus:text-slate-800 pointer-events-none ${Icon ? 'peer-placeholder-shown:left-8 peer-focus:left-0' : ''}`}>{label}</label>
-    </div>
-);
-const MinimalSelect = ({ label, value, onChange, options, icon: Icon }: any) => (
-  <div className="group relative pt-6">
-    <div className="absolute top-9 left-0 text-slate-400 pointer-events-none z-10">{Icon && <Icon size={18} />}</div>
-    <select value={value} onChange={onChange} className={`peer w-full py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium appearance-none cursor-pointer ${Icon ? 'pl-8' : 'px-0'}`} >{options.map((opt: any) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}</select>
-    <label className={`absolute left-0 top-1 text-xs text-slate-400 font-medium uppercase tracking-wide transition-all ${Icon ? 'left-0' : ''}`}>{label}</label>
-  </div>
-);
+const MinimalInput = ({ label, value, onChange, type = "text", required = false, placeholder = "", icon }: any) => {
+    const Icon = icon;
+    return (
+        <div className="group relative pt-6">
+          <div className="absolute top-9 left-0 text-slate-400">{Icon && <Icon size={18} />}</div>
+          <input type={type} required={required} value={value} onChange={onChange} placeholder={placeholder || " "} className={`peer w-full py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium placeholder-transparent focus:placeholder-slate-300 ${Icon ? 'pl-8' : 'px-0'}`} />
+          <label className={`absolute left-0 top-1 text-xs text-slate-400 font-medium transition-all uppercase tracking-wide peer-placeholder-shown:text-sm peer-placeholder-shown:text-slate-400 peer-placeholder-shown:top-9 peer-focus:top-1 peer-focus:text-xs peer-focus:text-slate-800 pointer-events-none ${Icon ? 'peer-placeholder-shown:left-8 peer-focus:left-0' : ''}`}>{label}</label>
+        </div>
+    );
+};
+
+const MinimalSelect = ({ label, value, onChange, options, icon }: any) => {
+  const Icon = icon;
+  return (
+      <div className="group relative pt-6">
+        <div className="absolute top-9 left-0 text-slate-400 pointer-events-none z-10">{Icon && <Icon size={18} />}</div>
+        <select value={value} onChange={onChange} className={`peer w-full py-2.5 border-b border-slate-200 bg-transparent text-slate-800 focus:border-slate-800 focus:ring-0 outline-none transition-all font-medium appearance-none cursor-pointer ${Icon ? 'pl-8' : 'px-0'}`} >{options.map((opt: any) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}</select>
+        <label className={`absolute left-0 top-1 text-xs text-slate-400 font-medium uppercase tracking-wide transition-all ${Icon ? 'left-0' : ''}`}>{label}</label>
+      </div>
+  );
+};
 
 export const Payments: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'Invoices' | 'History' | 'Statements' | 'Schedule'>('Invoices');

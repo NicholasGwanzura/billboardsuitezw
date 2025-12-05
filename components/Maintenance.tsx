@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { getMaintenanceRecords, addMaintenanceRecord, getBillboards } from '../services/mockData';
 import { MaintenanceRecord } from '../types';
-import { Wrench, CheckCircle, AlertTriangle, Calendar, Plus, X, Search, Activity, Save, ClipboardList, CheckSquare } from 'lucide-react';
+import { Wrench, CheckCircle, AlertTriangle, Plus, X, Search, Activity, Save, ClipboardList } from 'lucide-react';
 
 const PremiumInput = ({ label, value, onChange, type = "text", required = false, placeholder = "" }: any) => (
   <div className="group relative">

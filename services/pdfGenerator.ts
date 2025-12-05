@@ -1,43 +1,33 @@
 
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { Invoice, Contract, Client } from '../types';
 import { getCompanyProfile, getCompanyLogo } from './mockData';
 
-// Helper to safely execute autoTable regardless of import structure
-const runAutoTable = (doc: any, options: any) => {
+// Safe dynamic import helper
+const loadJsPDF = async () => {
     try {
-        if (typeof autoTable === 'function') {
-            autoTable(doc, options);
-            return;
-        } 
-        if (typeof (doc as any).autoTable === 'function') {
-            (doc as any).autoTable(options);
-            return;
-        }
-        if ((autoTable as any)?.default && typeof (autoTable as any).default === 'function') {
-            (autoTable as any).default(doc, options);
-            return;
-        }
+        const jsPDFModule = await import('jspdf');
+        const autoTableModule = await import('jspdf-autotable');
+        const jsPDF = jsPDFModule.jsPDF || (jsPDFModule as any).default;
+        
+        // Handle autoTable default export weirdness
+        const autoTable = autoTableModule.default || autoTableModule;
+        
+        return { jsPDF, autoTable };
     } catch (e) {
-        console.error('Error running autoTable:', e);
+        console.error("Failed to load PDF libraries", e);
+        throw new Error("PDF generation libraries could not be loaded.");
     }
 };
 
-const addCompanyHeader = (doc: jsPDF): number => {
-    // IMPORTANT: Fetch profile here inside the function to get the latest state from LocalStorage
-    const profile = getCompanyProfile(); 
-    const logo = getCompanyLogo();
+const addCompanyHeader = (doc: any, profile: any, logo: any): number => {
     const pageWidth = doc.internal.pageSize.width;
     let startY = 15;
 
     // Logo (Top Left)
     if (logo && logo.startsWith('data:image')) {
         try {
-            // Assume square-ish logo, fit into 25x25 box
             doc.addImage(logo, 'JPEG', 14, 10, 25, 25);
         } catch (e) {
-            // Fallback for PNG or if compression fails
             try {
                  doc.addImage(logo, 'PNG', 14, 10, 25, 25);
             } catch (err) {
@@ -83,12 +73,13 @@ const addCompanyHeader = (doc: jsPDF): number => {
     return startY + 15; // Return Y position for next elements
 };
 
-export const generateInvoicePDF = (invoice: Invoice, client: Client) => {
+export const generateInvoicePDF = async (invoice: Invoice, client: Client) => {
   try {
+    const { jsPDF, autoTable } = await loadJsPDF();
     const doc = new jsPDF();
     
     // Add Company Header
-    let currentY = addCompanyHeader(doc);
+    let currentY = addCompanyHeader(doc, getCompanyProfile(), getCompanyLogo());
     
     // Document Title & Info
     doc.setFontSize(22);
@@ -152,7 +143,7 @@ export const generateInvoicePDF = (invoice: Invoice, client: Client) => {
     const tableStartY = metaY + 30;
 
     if (tableRows.length > 0) {
-        runAutoTable(doc, {
+        autoTable(doc, {
             startY: tableStartY,
             head: [tableColumn],
             body: tableRows,
@@ -196,18 +187,17 @@ export const generateInvoicePDF = (invoice: Invoice, client: Client) => {
     doc.save(`${invoice.type}_${invoice.id}.pdf`);
   } catch (error) {
     console.error("PDF Generation Error:", error);
-    alert("Failed to generate PDF. Please check console for details.");
+    alert("Failed to generate PDF. Please reload and try again.");
   }
 };
 
-export const generateContractPDF = (contract: Contract, client: Client, billboardName: string) => {
+export const generateContractPDF = async (contract: Contract, client: Client, billboardName: string) => {
   try {
+    const { jsPDF } = await loadJsPDF();
     const doc = new jsPDF();
-    // Use function to get latest profile state
     const profile = getCompanyProfile();
 
-    // Add Company Header
-    let currentY = addCompanyHeader(doc);
+    let currentY = addCompanyHeader(doc, profile, getCompanyLogo());
 
     doc.setFontSize(22);
     doc.setTextColor(15, 23, 42);
@@ -296,7 +286,7 @@ export const generateContractPDF = (contract: Contract, client: Client, billboar
     
     currentY += 15;
 
-    // New Section: Terms and Conditions
+    // Terms
     doc.setFontSize(12);
     doc.setTextColor(15, 23, 42);
     doc.setFont("helvetica", "bold");
@@ -309,10 +299,10 @@ export const generateContractPDF = (contract: Contract, client: Client, billboar
     
     const terms = [
         "1. PAYMENT: All rental payments are due in advance on the 1st of each month unless otherwise specified.",
-        "2. ARTWORK: The Lessee is responsible for providing artwork in the required format. Printing costs are separate unless stated.",
-        "3. MAINTENANCE: The Lessor shall maintain the structure in good repair. Damage caused by weather (Acts of God) will be repaired by Lessor.",
+        "2. ARTWORK: The Lessee is responsible for providing artwork in the required format. Printing costs are separate.",
+        "3. MAINTENANCE: The Lessor shall maintain the structure in good repair.",
         "4. INDEMNITY: The Lessee indemnifies the Lessor against claims arising from the content of the advertisement.",
-        "5. TERMINATION: Either party may terminate this agreement with 30 days written notice prior to the end of the contract term.",
+        "5. TERMINATION: Either party may terminate this agreement with 30 days written notice.",
         "6. JURISDICTION: This agreement is governed by the laws of Zimbabwe."
     ];
     
@@ -331,26 +321,22 @@ export const generateContractPDF = (contract: Contract, client: Client, billboar
     
     currentY += 15;
     
-    // Draw Signature Boxes
     const boxY = currentY;
     
-    // Box 1 - Lessor
     doc.setDrawColor(200);
     doc.setLineWidth(0.5);
     doc.rect(14, boxY, 80, 30);
     doc.setFontSize(8);
     doc.setTextColor(150);
     doc.text("Signed for and on behalf of Lessor:", 16, boxY + 5);
-    doc.line(20, boxY + 22, 80, boxY + 22); // Signature line
+    doc.line(20, boxY + 22, 80, boxY + 22);
     doc.text(profile.name, 20, boxY + 27);
 
-    // Box 2 - Lessee
     doc.rect(110, boxY, 80, 30);
     doc.text("Signed for and on behalf of Lessee:", 112, boxY + 5);
-    doc.line(116, boxY + 22, 176, boxY + 22); // Signature line
+    doc.line(116, boxY + 22, 176, boxY + 22);
     doc.text(client.companyName, 116, boxY + 27);
 
-    // Footer
     doc.setFontSize(8);
     doc.setTextColor(150);
     doc.setFont("helvetica", "normal");
@@ -363,14 +349,14 @@ export const generateContractPDF = (contract: Contract, client: Client, billboar
   }
 };
 
-export const generateStatementPDF = (client: Client, transactions: Invoice[], activeRentals: Contract[], billboardNameGetter: (id: string) => string) => {
+export const generateStatementPDF = async (client: Client, transactions: Invoice[], activeRentals: Contract[], billboardNameGetter: (id: string) => string) => {
     try {
+        const { jsPDF, autoTable } = await loadJsPDF();
         const doc = new jsPDF();
+        const profile = getCompanyProfile();
         
-        // Add Company Header
-        let currentY = addCompanyHeader(doc);
+        let currentY = addCompanyHeader(doc, profile, getCompanyLogo());
 
-        // Header
         doc.setFontSize(20);
         doc.setTextColor(15, 23, 42);
         doc.setFont("helvetica", "bold");
@@ -384,8 +370,7 @@ export const generateStatementPDF = (client: Client, transactions: Invoice[], ac
         
         currentY += 15;
 
-        // Client Box
-        doc.setFillColor(241, 245, 249); // Slate 100
+        doc.setFillColor(241, 245, 249);
         doc.rect(14, currentY, 90, 25, 'F');
         doc.setFontSize(10);
         doc.setTextColor(15, 23, 42);
@@ -396,23 +381,21 @@ export const generateStatementPDF = (client: Client, transactions: Invoice[], ac
         doc.text(client.contactPerson, 18, currentY + 12);
         doc.text(client.email, 18, currentY + 18);
 
-        // Balance Box (Right)
         const totalBilled = transactions.filter(t => t.type === 'Invoice').reduce((acc, t) => acc + t.total, 0);
         const totalPaid = transactions.filter(t => t.type === 'Receipt').reduce((acc, t) => acc + t.total, 0);
         const balance = totalBilled - totalPaid;
 
-        doc.setFillColor(balance > 0 ? 254 : 240, balance > 0 ? 242 : 253, balance > 0 ? 242 : 244); // Red-ish or Green-ish bg
+        doc.setFillColor(balance > 0 ? 254 : 240, balance > 0 ? 242 : 253, balance > 0 ? 242 : 244);
         doc.rect(120, currentY, 76, 25, 'F');
         doc.setTextColor(100);
         doc.text("Amount Due:", 125, currentY + 8);
         doc.setFontSize(16);
-        doc.setTextColor(balance > 0 ? 220 : 22, balance > 0 ? 38 : 163, balance > 0 ? 38 : 74); // Red or Green text
+        doc.setTextColor(balance > 0 ? 220 : 22, balance > 0 ? 38 : 163, balance > 0 ? 38 : 74);
         doc.setFont("helvetica", "bold");
         doc.text(`$${balance.toFixed(2)}`, 190, currentY + 18, { align: 'right' });
 
         currentY += 35;
 
-        // Active Rentals Section
         doc.setFontSize(12);
         doc.setTextColor(15, 23, 42);
         doc.text("Active Services", 14, currentY);
@@ -424,7 +407,7 @@ export const generateStatementPDF = (client: Client, transactions: Invoice[], ac
             `${r.startDate} to ${r.endDate}`
         ]);
         
-        runAutoTable(doc, {
+        autoTable(doc, {
             startY: currentY + 5,
             head: [['Billboard', 'Side/Slot', 'Rate', 'Duration']],
             body: rentalRows,
@@ -433,7 +416,6 @@ export const generateStatementPDF = (client: Client, transactions: Invoice[], ac
             styles: { fontSize: 9 }
         });
 
-        // Transactions Table
         const finalY = (doc as any).lastAutoTable?.finalY || currentY + 20;
         doc.text("Transaction History", 14, finalY + 15);
 
@@ -444,10 +426,9 @@ export const generateStatementPDF = (client: Client, transactions: Invoice[], ac
             t.type === 'Invoice' ? `$${t.total.toFixed(2)}` : '-',
             t.type === 'Receipt' ? `$${t.total.toFixed(2)}` : '-'
         ]);
-        // Add totals row
         transactionRows.push(['', 'TOTALS', '', `$${totalBilled.toFixed(2)}`, `$${totalPaid.toFixed(2)}`]);
 
-        runAutoTable(doc, {
+        autoTable(doc, {
             startY: finalY + 20,
             head: [['Date', 'Type', 'Reference', 'Billed', 'Paid']],
             body: transactionRows,

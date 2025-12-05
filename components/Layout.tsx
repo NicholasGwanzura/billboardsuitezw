@@ -1,8 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Map, Users, FileText, CreditCard, Receipt, Settings as SettingsIcon,
-  Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, Radio, ChevronRight, Box
+  Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, ChevronRight, Box, Wrench
 } from 'lucide-react';
 import { getCurrentUser, logout } from '../services/authService';
 import { getSystemAlertCount, triggerAutoBackup, runAutoBilling } from '../services/mockData';
@@ -23,15 +24,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
     // Initial checks on mount
     setAlertCount(getSystemAlertCount());
     triggerAutoBackup();
-    
-    // Trigger auto-billing check on load
     runAutoBilling();
 
-    // Periodic intervals
     const interval = setInterval(() => setAlertCount(getSystemAlertCount()), 10000);
     const backupInterval = setInterval(() => triggerAutoBackup(), 5 * 60 * 1000);
-    
-    // Check billing every hour (in case app is left open across days)
     const billingInterval = setInterval(() => runAutoBilling(), 60 * 60 * 1000);
 
     return () => { 
@@ -46,6 +42,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
     { id: 'analytics', label: 'Profit & Analytics', icon: PieChart },
     { id: 'billboards', label: 'Billboards', icon: Map },
     { id: 'rentals', label: 'Rentals', icon: FileText },
+    { id: 'maintenance', label: 'Maintenance', icon: Wrench },
     { id: 'outsourced', label: 'Outsourced', icon: Globe },
     { id: 'payments', label: 'Payments', icon: Wallet },
     { id: 'clients', label: 'Clients', icon: Users },
@@ -59,7 +56,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc] supports-[height:100dvh]:h-[100dvh]">
-      {/* Mobile Sidebar Backdrop */}
       {sidebarOpen && (
         <div 
           className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[90] lg:hidden transition-opacity"
@@ -67,18 +63,13 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
         />
       )}
 
-      {/* Sidebar - Premium Brand Colors */}
       <aside 
         className={`fixed inset-y-0 left-0 z-[100] w-72 transform transition-transform duration-300 ease-[cubic-bezier(0.25,0.8,0.25,1)] lg:translate-x-0 lg:relative flex flex-col ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
         } bg-slate-900 shadow-2xl border-r border-white/5 overflow-hidden`}
       >
-        {/* Background Gradients for Sidebar */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-[#0f172a] to-slate-950 z-0"></div>
-        <div className="absolute top-0 left-0 w-full h-96 bg-brand-500/10 blur-[100px] rounded-full z-0 pointer-events-none"></div>
-        <div className="absolute bottom-0 right-0 w-full h-96 bg-accent-500/10 blur-[100px] rounded-full z-0 pointer-events-none"></div>
-
-        {/* Sidebar Header - Dreambox Logo */}
+        
         <div className="relative z-10 flex items-center justify-between p-6 shrink-0">
           <div className="flex items-center gap-3 group cursor-pointer">
              <div className="w-10 h-10 bg-gradient-to-br from-brand-500 to-accent-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform duration-300">
@@ -97,7 +88,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
           </button>
         </div>
 
-        {/* Navigation */}
         <nav className="relative z-10 flex-1 overflow-y-auto px-4 py-2 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
           {menuItems.map((item) => {
             const Icon = item.icon;
@@ -125,7 +115,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
           })}
         </nav>
 
-        {/* Sidebar Footer */}
         <div className="relative z-10 p-6 bg-slate-950/30 backdrop-blur-md border-t border-white/5 shrink-0">
            <div className="flex items-center gap-3 mb-4 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 transition-colors cursor-pointer group">
               <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-sm font-bold border border-white/10 text-white shadow-inner">
@@ -142,17 +131,14 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
            
            <div className="flex items-center justify-between text-[10px] text-slate-500 py-1 px-1">
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div> System Online</span>
-              <span className="font-mono opacity-50">v1.5.7</span>
+              <span className="font-mono opacity-50">v1.7.3</span>
            </div>
         </div>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 h-full relative">
-        {/* Background pattern for main area */}
         <div className="absolute inset-0 pointer-events-none z-0 opacity-40" style={{ backgroundImage: 'radial-gradient(#cbd5e1 1px, transparent 1px)', backgroundSize: '30px 30px' }}></div>
 
-        {/* Glass Header */}
         <header className="glass sticky top-0 z-40 h-auto min-h-[4rem] sm:min-h-[4.5rem] flex items-center justify-between px-4 sm:px-6 lg:px-8 py-3 shrink-0 transition-all duration-300 shadow-sm sm:shadow-none">
           <div className="flex items-center gap-3 sm:gap-4">
              <button onClick={() => setSidebarOpen(true)} className="lg:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100/50 rounded-xl transition-colors">
@@ -179,7 +165,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
           </div>
         </header>
 
-        {/* Scrollable Content */}
         <div className="flex-1 overflow-y-auto p-3 sm:p-6 lg:p-8 relative z-10 scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-transparent">
            <div className="max-w-7xl mx-auto pb-20">
              {children}

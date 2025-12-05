@@ -1,4 +1,5 @@
-import React, { useState, useEffect, ReactNode } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { BillboardList } from './components/BillboardList';
@@ -10,11 +11,12 @@ import { Settings } from './components/Settings';
 import { OutsourcedList } from './components/OutsourcedList';
 import { Analytics } from './components/Analytics';
 import { Payments } from './components/Payments';
+import { Maintenance } from './components/Maintenance';
 import { Auth } from './components/Auth';
 import { getCurrentUser } from './services/authService';
 
 interface ErrorBoundaryProps {
-  children?: ReactNode;
+  children?: React.ReactNode;
 }
 
 interface ErrorBoundaryState {
@@ -63,7 +65,6 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-      // Check auth state safely on mount
       try {
           const user = getCurrentUser();
           setIsAuthenticated(!!user);
@@ -83,6 +84,7 @@ const App: React.FC = () => {
       case 'payments': return <Payments />;
       case 'clients': return <ClientList />;
       case 'rentals': return <Rentals />;
+      case 'maintenance': return <Maintenance />;
       case 'financials': return <Financials initialTab="Invoices" />;
       case 'receipts': return <Financials initialTab="Receipts" />;
       case 'expenses': return <Expenses />;
