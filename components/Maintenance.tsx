@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { getMaintenanceRecords, addMaintenanceRecord, getBillboards } from '../services/mockData';
 import { MaintenanceRecord } from '../types';
-import { Wrench, CheckCircle, AlertTriangle, Calendar, Plus, X, Search, Activity, Save } from 'lucide-react';
+import { Wrench, CheckCircle, AlertTriangle, Calendar, Plus, X, Search, Activity, Save, ClipboardList, CheckSquare } from 'lucide-react';
 
 const PremiumInput = ({ label, value, onChange, type = "text", required = false, placeholder = "" }: any) => (
   <div className="group relative">
@@ -80,6 +80,11 @@ export const Maintenance: React.FC = () => {
     });
   };
 
+  const insertChecklist = () => {
+      const safetyChecklist = "SAFETY INSPECTION LOG:\n[ ] All Bolts Tightened & Secured\n[ ] Structural Frame Integrity Verified\n[ ] Electrical Connections Safe\n[ ] No Loose/Broken Components\n[ ] Walkway/Ladder Secure";
+      setNewRecord(prev => ({...prev, notes: safetyChecklist}));
+  };
+
   const getMaintenanceStatus = (lastDate?: string) => {
       if (!lastDate) return { status: 'Critical', color: 'red', label: 'Never Checked' };
       
@@ -88,8 +93,9 @@ export const Maintenance: React.FC = () => {
       const diffTime = Math.abs(today.getTime() - lastCheck.getTime());
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      if (diffDays > 120) return { status: 'Critical', color: 'red', label: `${diffDays} days ago` };
-      if (diffDays > 90) return { status: 'Warning', color: 'amber', label: `${diffDays} days ago` };
+      // Updated Thresholds for 3-Month Cycle
+      if (diffDays > 90) return { status: 'Critical', color: 'red', label: `${diffDays} days ago` };
+      if (diffDays > 60) return { status: 'Warning', color: 'amber', label: `${diffDays} days ago` };
       return { status: 'Healthy', color: 'emerald', label: `${diffDays} days ago` };
   };
 
@@ -111,7 +117,7 @@ export const Maintenance: React.FC = () => {
           </h2>
           <p className="text-slate-500 font-medium flex items-center gap-2">
             <Activity size={16} className="text-emerald-500" />
-            Track structural integrity, bolt checks, and repairs
+            Quarterly structural integrity and bolt checks
           </p>
         </div>
         
@@ -132,7 +138,7 @@ export const Maintenance: React.FC = () => {
                   <div className="p-3 bg-red-50 rounded-2xl text-red-600"><AlertTriangle size={24}/></div>
                   <div>
                       <h4 className="font-bold text-slate-800">Critical Attention</h4>
-                      <p className="text-xs text-slate-500">Overdue > 4 Months</p>
+                      <p className="text-xs text-slate-500">Overdue > 3 Months</p>
                   </div>
               </div>
               <div className="text-3xl font-black text-slate-900">
@@ -160,7 +166,7 @@ export const Maintenance: React.FC = () => {
                   <div className="p-3 bg-emerald-50 rounded-2xl text-emerald-600"><CheckCircle size={24}/></div>
                   <div>
                       <h4 className="font-bold text-slate-800">Healthy Fleet</h4>
-                      <p className="text-xs text-slate-500">Checked recently</p>
+                      <p className="text-xs text-slate-500">Checked < 2 Months</p>
                   </div>
               </div>
               <div className="text-3xl font-black text-slate-900">
@@ -293,12 +299,15 @@ export const Maintenance: React.FC = () => {
                         <PremiumInput label="Cost ($)" type="number" value={newRecord.cost} onChange={(e: any) => setNewRecord({...newRecord, cost: Number(e.target.value)})} />
                     </div>
 
-                    <div className="space-y-1">
-                        <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold ml-4">Notes</label>
+                    <div className="space-y-2">
+                        <div className="flex justify-between items-center ml-4">
+                            <label className="text-[10px] uppercase tracking-wider text-slate-400 font-bold">Notes</label>
+                            <button type="button" onClick={insertChecklist} className="text-[10px] font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 px-2 py-1 rounded flex items-center gap-1 transition-colors"><ClipboardList size={12}/> Load Safety Checklist</button>
+                        </div>
                         <textarea 
                             value={newRecord.notes} 
                             onChange={(e) => setNewRecord({...newRecord, notes: e.target.value})}
-                            className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all font-medium text-sm h-24 resize-none"
+                            className="w-full bg-slate-50/50 border border-slate-200 rounded-xl px-4 py-3 text-slate-800 focus:bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all font-medium text-sm h-32 resize-none"
                             placeholder="Describe work done or issues found..."
                         />
                     </div>

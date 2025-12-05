@@ -500,34 +500,32 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
-        version: '1.7.0',
+        version: '1.7.3',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-        title: 'Maintenance Module',
+        title: 'Enhanced Safety Inspections',
         features: [
-            'Maintenance Tracking: Dedicated module to log bolt checks, repairs, and cleaning.',
-            'Safety Alerts: Automatic system alerts if a billboard hasn\'t been checked in over 4 months.',
-            'Health Status: Visual indicators (Green/Amber/Red) for fleet maintenance health.',
-            'Integrated Costs: Maintenance costs are now tracked in the records.'
+            'Safety Checklist: Added detailed checklist for bolts, structural integrity, and electrical systems in maintenance module.',
+            '3-Month Protocol: Enforced strict 3-month cycle for all physical inspections.',
+            'Reporting: Detailed maintenance logs now include specific component checks.'
         ]
     },
     {
-        version: '1.6.0',
-        date: '2/22/2026 06:30 PM',
-        title: 'Weather Safety Integration',
+        version: '1.7.2',
+        date: '2/22/2026 07:15 PM',
+        title: 'Tightened Safety Standards',
         features: [
-            'Dashboard Widget: Added real-time weather alerts sidebar to monitor field conditions.',
-            'Safety Alerts: Integrated wind and storm warnings for billboard maintenance safety.',
-            'Visual Upgrade: Applied dynamic glassmorphism styling to the new weather component.'
+            'Policy Update: Reduced maintenance interval from 4 months to 3 months.',
+            'Safety Protocol: Critical alerts now trigger after 90 days of inactivity.',
+            'Bolt Check: Prioritized bolt and structural integrity checks in maintenance logs.'
         ]
     },
     {
-        version: '1.5.9',
-        date: '2/22/2026 06:15 PM',
-        title: 'Deployment & Stability Build',
+        version: '1.7.1',
+        date: '2/22/2026 07:00 PM',
+        title: 'Domain Deployment Verification',
         features: [
-            'System Preparation: Optimized application state for production deployment.',
-            'Enterprise Branding: Finalized "Dreambox Advertising Suite" branding and title configuration.',
-            'Release Integrity: Verified data persistence and backup restoration checks for live environment.'
+            'System Validation: Confirmed deployment pipeline integrity for custom domain mapping.',
+            'Cloud Run Integration: Verified secure connection and routing.'
         ]
     }
 ];
@@ -624,13 +622,13 @@ export const getExpiringContracts = () => {
 
 export const getOverdueMaintenance = () => {
     const today = new Date();
-    const fourMonthsAgo = new Date();
-    fourMonthsAgo.setMonth(today.getMonth() - 4);
+    const threeMonthsAgo = new Date();
+    threeMonthsAgo.setMonth(today.getMonth() - 3);
     
     return billboards.filter(b => {
         // If never checked, it's overdue
         if (!b.lastMaintenanceDate) return true;
-        return new Date(b.lastMaintenanceDate) < fourMonthsAgo;
+        return new Date(b.lastMaintenanceDate) < threeMonthsAgo;
     });
 };
 
@@ -653,174 +651,4 @@ export const getFinancialTrends = () => {
         const monthlyRevenue = invoices
             .filter(inv => {
                 const invDate = new Date(inv.date);
-                return inv.type === 'Invoice' && invDate.getMonth() === monthIndex && invDate.getFullYear() === year;
-            })
-            .reduce((acc, curr) => acc + curr.total, 0);
-
-        // Calculate Expenses for this month
-        const monthlyExpenses = expenses
-            .filter(exp => {
-                const expDate = new Date(exp.date);
-                return expDate.getMonth() === monthIndex && expDate.getFullYear() === year;
-            })
-            .reduce((acc, curr) => acc + curr.amount, 0);
-            
-        // Calculate Printing Costs for this month (approx)
-        const monthlyPrinting = printingJobs
-            .filter(job => {
-                const jobDate = new Date(job.date);
-                return jobDate.getMonth() === monthIndex && jobDate.getFullYear() === year;
-            })
-            .reduce((acc, curr) => acc + curr.totalCost, 0);
-
-        const totalExpenses = monthlyExpenses + monthlyPrinting;
-
-        result.push({
-            name: monthName,
-            revenue: monthlyRevenue,
-            expenses: totalExpenses,
-            margin: monthlyRevenue - totalExpenses
-        });
-    }
-
-    // Add a projection for next month based on active contracts
-    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-    const activeContractRevenue = contracts
-        .filter(c => c.status === 'Active').reduce((acc, c) => acc + c.monthlyRate, 0);
-    
-    // Estimate expenses based on average of last 3 months
-    const avgExpenses = result.slice(-3).reduce((acc, curr) => acc + curr.expenses, 0) / 3 || 0;
-
-    result.push({
-        name: nextMonth.toLocaleString('default', { month: 'short' }) + ' (Proj)',
-        revenue: activeContractRevenue,
-        expenses: Math.round(avgExpenses),
-        margin: activeContractRevenue - Math.round(avgExpenses),
-        isProjection: true
-    });
-
-    return result;
-};
-
-export const logAction = (action: string, details: string) => {
-    const log: AuditLogEntry = { id: `log-${Date.now()}`, timestamp: new Date().toLocaleString(), action, details, user: 'Current User' };
-    auditLogs = [log, ...auditLogs];
-    saveToStorage(STORAGE_KEYS.LOGS, auditLogs);
-};
-
-export const addBillboard = (billboard: Billboard) => { 
-    billboards = [...billboards, billboard]; 
-    saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
-    logAction('Create Billboard', `Added ${billboard.name} (${billboard.type})`); 
-};
-export const updateBillboard = (updated: Billboard) => { 
-    billboards = billboards.map(b => b.id === updated.id ? updated : b); 
-    saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
-    logAction('Update Billboard', `Updated details for ${updated.name}`); 
-};
-export const deleteBillboard = (id: string) => { 
-    const target = billboards.find(b => b.id === id); 
-    if (target) { 
-        billboards = billboards.filter(b => b.id !== id); 
-        saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
-        logAction('Delete Billboard', `Removed ${target.name} from inventory`);
-    }
-};
-
-export const addMaintenanceRecord = (record: MaintenanceRecord) => {
-    maintenanceRecords = [record, ...maintenanceRecords];
-    saveToStorage(STORAGE_KEYS.MAINTENANCE, maintenanceRecords);
-    
-    // Update Billboard Last Checked Date
-    const billboard = billboards.find(b => b.id === record.billboardId);
-    if (billboard) {
-        billboard.lastMaintenanceDate = record.date;
-        updateBillboard(billboard);
-    }
-    logAction('Maintenance', `Recorded ${record.type} for Billboard #${record.billboardId}`);
-};
-
-export const addContract = (contract: Contract) => { 
-    contracts = [...contracts, contract]; 
-    saveToStorage(STORAGE_KEYS.CONTRACTS, contracts); 
-    
-    // Update Billboard Status if Static
-    const billboard = billboards.find(b => b.id === contract.billboardId);
-    if(billboard) {
-        if(billboard.type === BillboardType.Static) {
-            if(contract.side === 'A' || contract.details.includes('Side A')) billboard.sideAStatus = 'Rented';
-            if(contract.side === 'B' || contract.details.includes('Side B')) billboard.sideBStatus = 'Rented';
-            if(contract.side === 'Both') { billboard.sideAStatus = 'Rented'; billboard.sideBStatus = 'Rented'; }
-            if(contract.details.includes('Side A') && contract.clientId) billboard.sideAClientId = contract.clientId;
-            if(contract.details.includes('Side B') && contract.clientId) billboard.sideBClientId = contract.clientId;
-        } else if (billboard.type === BillboardType.LED) {
-            billboard.rentedSlots = (billboard.rentedSlots || 0) + 1;
-        }
-        updateBillboard(billboard);
-    }
-    logAction('Create Contract', `New contract for ${contract.billboardId}`); 
-};
-
-export const deleteContract = (id: string) => {
-    const contract = contracts.find(c => c.id === id);
-    if(contract) {
-        contracts = contracts.filter(c => c.id !== id);
-        saveToStorage(STORAGE_KEYS.CONTRACTS, contracts);
-        
-        // Free up the billboard
-        const billboard = billboards.find(b => b.id === contract.billboardId);
-        if(billboard) {
-            if(billboard.type === BillboardType.Static) {
-                if(contract.side === 'A' || contract.details.includes('Side A')) { billboard.sideAStatus = 'Available'; billboard.sideAClientId = undefined; }
-                if(contract.side === 'B' || contract.details.includes('Side B')) { billboard.sideBStatus = 'Available'; billboard.sideBClientId = undefined; }
-                if(contract.side === 'Both') { 
-                    billboard.sideAStatus = 'Available'; billboard.sideBStatus = 'Available'; 
-                    billboard.sideAClientId = undefined; billboard.sideBClientId = undefined;
-                }
-            } else if(billboard.type === BillboardType.LED) {
-                billboard.rentedSlots = Math.max(0, (billboard.rentedSlots || 0) - 1);
-            }
-            updateBillboard(billboard);
-        }
-        logAction('Delete Contract', `Removed contract ${id}`);
-    }
-};
-
-export const addInvoice = (invoice: Invoice) => { invoices = [invoice, ...invoices]; saveToStorage(STORAGE_KEYS.INVOICES, invoices); logAction('Create Invoice', `Created ${invoice.type} #${invoice.id} ($${invoice.total})`); };
-export const markInvoiceAsPaid = (id: string) => { invoices = invoices.map(i => i.id === id ? { ...i, status: 'Paid' } : i); saveToStorage(STORAGE_KEYS.INVOICES, invoices); logAction('Payment', `Marked Invoice #${id} as Paid`); };
-export const addExpense = (expense: Expense) => { expenses = [expense, ...expenses]; saveToStorage(STORAGE_KEYS.EXPENSES, expenses); logAction('Expense', `Recorded expense: ${expense.description} ($${expense.amount})`); };
-export const addClient = (client: Client) => { 
-    clients = [...clients, client]; 
-    saveToStorage(STORAGE_KEYS.CLIENTS, clients); 
-    logAction('Create Client', `Added ${client.companyName}`); 
-};
-export const updateClient = (updated: Client) => {
-    clients = clients.map(c => c.id === updated.id ? updated : c);
-    saveToStorage(STORAGE_KEYS.CLIENTS, clients);
-    logAction('Update Client', `Updated info for ${updated.companyName}`);
-};
-export const deleteClient = (id: string) => { 
-    const target = clients.find(c => c.id === id); 
-    if (target) { 
-        clients = clients.filter(c => c.id !== id); 
-        saveToStorage(STORAGE_KEYS.CLIENTS, clients); 
-        logAction('Delete Client', `Removed ${target.companyName}`); 
-    }
-};
-export const addUser = (user: User) => { users = [...users, user]; saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Added user ${user.email}`); };
-export const updateUser = (updated: User) => { users = users.map(u => u.id === updated.id ? updated : u); saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Updated user ${updated.email}`); };
-export const deleteUser = (id: string) => { users = users.filter(u => u.id !== id); saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Deleted user ID ${id}`); };
-export const addOutsourcedBillboard = (b: OutsourcedBillboard) => { outsourcedBillboards = [...outsourcedBillboards, b]; saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); logAction('Outsourcing', `Added outsourced unit ${b.billboardId}`); };
-export const updateOutsourcedBillboard = (updated: OutsourcedBillboard) => { outsourcedBillboards = outsourcedBillboards.map(b => b.id === updated.id ? updated : b); saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); };
-export const deleteOutsourcedBillboard = (id: string) => { outsourcedBillboards = outsourcedBillboards.filter(b => b.id !== id); saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); };
-
-// Aliases for compatibility
-export { 
-  billboards as mockBillboards,
-  clients as mockClients,
-  contracts as mockContracts,
-  invoices as mockInvoices,
-  expenses as mockExpenses,
-  printingJobs as mockPrintingJobs,
-  outsourcedBillboards as mockOutsourcedBillboards
-};
+                return inv.type === 'Invoice' && invDate.getMonth() === monthIndex && invDate.getFullYear()

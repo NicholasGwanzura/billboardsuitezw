@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, ReactNode, Component } from 'react';
+import React, { useState, useEffect, ReactNode } from 'react';
 import { Layout } from './components/Layout';
 import { Dashboard } from './components/Dashboard';
 import { BillboardList } from './components/BillboardList';
@@ -16,14 +15,14 @@ import { Auth } from './components/Auth';
 import { getCurrentUser } from './services/authService';
 
 interface ErrorBoundaryProps {
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 interface ErrorBoundaryState {
   hasError: boolean;
 }
 
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -40,11 +39,16 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
   render() {
     if (this.state.hasError) {
       return (
-        <div className="h-screen flex items-center justify-center bg-slate-50 text-slate-900">
-           <div className="text-center p-8 bg-white rounded-2xl shadow-xl">
-             <h1 className="text-2xl font-bold mb-2">Something went wrong.</h1>
-             <p className="text-slate-500 mb-4">Please refresh the page or contact support.</p>
-             <button onClick={() => window.location.reload()} className="bg-slate-900 text-white px-6 py-2 rounded-full font-bold uppercase text-sm hover:bg-slate-800">Refresh Page</button>
+        <div className="h-screen flex items-center justify-center bg-slate-50 text-slate-900 font-sans">
+           <div className="text-center p-8 bg-white rounded-3xl shadow-xl max-w-md border border-slate-100">
+             <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6 text-red-500">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+             </div>
+             <h1 className="text-2xl font-black mb-2 text-slate-900">System Error</h1>
+             <p className="text-slate-500 mb-8 font-medium">The application encountered an unexpected issue. Please reload to try again.</p>
+             <button onClick={() => window.location.reload()} className="bg-slate-900 text-white px-8 py-3 rounded-xl font-bold uppercase tracking-wider text-xs hover:bg-slate-800 transition-all shadow-lg hover:shadow-xl w-full">
+                Reload Application
+             </button>
            </div>
         </div>
       );
@@ -56,7 +60,20 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 
 const App: React.FC = () => {
   const [currentPage, setCurrentPage] = useState('dashboard');
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(!!getCurrentUser());
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+      // Check auth state safely on mount
+      try {
+          const user = getCurrentUser();
+          setIsAuthenticated(!!user);
+      } catch (e) {
+          console.error("Auth check failed", e);
+      } finally {
+          setIsLoading(false);
+      }
+  }, []);
 
   const renderPage = () => {
     switch (currentPage) {
@@ -75,6 +92,10 @@ const App: React.FC = () => {
       default: return <Dashboard />;
     }
   };
+
+  if (isLoading) {
+      return <div className="h-screen w-full flex items-center justify-center bg-slate-50"><div className="w-8 h-8 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div></div>;
+  }
 
   if (!isAuthenticated) {
       return (
