@@ -4,8 +4,8 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, 
   BarChart, Bar, Cell, PieChart, Pie, Legend, ComposedChart, Line
 } from 'recharts';
-import { DollarSign, FileText, Activity, Users, Sparkles, TrendingUp, Bell, AlertTriangle, Clock, Calendar, ArrowRight, BrainCircuit, Cloud, Wind, Droplets, Wrench } from 'lucide-react';
-import { getContracts, getInvoices, getBillboards, getClients, getExpiringContracts, getOverdueInvoices, getUpcomingBillings, getFinancialTrends, getOverdueMaintenance } from '../services/mockData';
+import { DollarSign, FileText, Activity, Users, Sparkles, TrendingUp, Bell, AlertTriangle, Clock, Calendar, ArrowRight, BrainCircuit } from 'lucide-react';
+import { getContracts, getInvoices, getBillboards, getClients, getExpiringContracts, getOverdueInvoices, getUpcomingBillings, getFinancialTrends } from '../services/mockData';
 import { BillboardType } from '../types';
 import { analyzeBusinessData } from '../services/aiService';
 
@@ -23,21 +23,8 @@ export const Dashboard: React.FC = () => {
   // Notification Data
   const expiringContracts = getExpiringContracts();
   const overdueInvoices = getOverdueInvoices();
-  const overdueMaintenance = getOverdueMaintenance();
   const upcomingBillings = getUpcomingBillings().slice(0, 3);
   const financialTrends = getFinancialTrends();
-
-  // Simulated Weather Data for Harare
-  const weather = {
-    temp: 28,
-    condition: 'Partly Cloudy',
-    location: 'Harare',
-    wind: 12,
-    humidity: 45,
-    alerts: [
-        { level: 'warning', message: 'Wind gusts up to 25km/h expected this afternoon. Avoid high-mast installations.' }
-    ]
-  };
 
   const totalRevenue = invoices.filter(i => i.type === 'Invoice').reduce((acc, curr) => acc + curr.total, 0);
   const activeContracts = contracts.filter(c => c.status === 'Active').length;
@@ -290,36 +277,6 @@ export const Dashboard: React.FC = () => {
 
       {/* Sidebar Notifications - Refined */}
       <div className="w-full xl:w-96 space-y-6 min-w-0">
-          {/* Weather Widget */}
-          <div className="glass bg-gradient-to-br from-sky-500 to-blue-600 p-6 rounded-3xl shadow-lg shadow-blue-500/20 text-white relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/20 rounded-full blur-3xl translate-x-10 -translate-y-10 group-hover:bg-white/30 transition-colors"></div>
-              <div className="relative z-10">
-                  <div className="flex justify-between items-start mb-4">
-                      <div>
-                          <h3 className="text-lg font-bold flex items-center gap-2"><Cloud size={20} className="text-sky-100"/> Weather Alert</h3>
-                          <p className="text-sky-100 text-xs font-medium opacity-90">{weather.location} • Field Conditions</p>
-                      </div>
-                      <div className="text-right">
-                          <span className="text-4xl font-black tracking-tighter">{weather.temp}°</span>
-                      </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 mb-6 text-sm font-medium text-sky-50">
-                      <div className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded-lg backdrop-blur-sm"><Wind size={14}/> {weather.wind} km/h</div>
-                      <div className="flex items-center gap-1.5 bg-white/10 px-2 py-1 rounded-lg backdrop-blur-sm"><Droplets size={14}/> {weather.humidity}%</div>
-                  </div>
-
-                  <div className="space-y-2">
-                      {weather.alerts.map((alert, idx) => (
-                          <div key={idx} className="p-3 rounded-xl border border-white/20 bg-black/10 backdrop-blur-md flex items-start gap-3">
-                              <AlertTriangle size={16} className="text-amber-300 shrink-0 mt-0.5" />
-                              <p className="text-xs leading-relaxed font-medium text-white">{alert.message}</p>
-                          </div>
-                      ))}
-                  </div>
-              </div>
-          </div>
-
           <div className="glass bg-white/80 p-6 rounded-3xl shadow-sm border border-white/50 backdrop-blur-xl">
              <div className="flex items-center gap-2 mb-6 text-slate-800 font-bold uppercase tracking-wide text-xs">
                  <Bell size={16} className="text-indigo-500" /> Action Required
@@ -350,7 +307,7 @@ export const Dashboard: React.FC = () => {
                  )}
 
                  {/* Alerts List */}
-                 {expiringContracts.length === 0 && overdueInvoices.length === 0 && overdueMaintenance.length === 0 ? (
+                 {expiringContracts.length === 0 && overdueInvoices.length === 0 ? (
                     <div className="p-8 text-center bg-slate-50/50 rounded-2xl border border-dashed border-slate-200">
                         <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-3 text-green-600"><Sparkles size={20}/></div>
                         <p className="text-sm font-medium text-slate-500">All caught up!</p>
@@ -358,20 +315,6 @@ export const Dashboard: React.FC = () => {
                     </div>
                  ) : (
                     <>
-                        {/* Maintenance Alerts */}
-                        {overdueMaintenance.slice(0,3).map(b => (
-                            <div key={b.id} className="p-4 bg-gradient-to-r from-red-50 to-white rounded-2xl border border-red-100 shadow-sm flex items-start gap-3">
-                                <div className="p-2 bg-white rounded-xl text-red-500 shadow-sm border border-red-50 shrink-0">
-                                    <Wrench size={16} />
-                                </div>
-                                <div className="min-w-0">
-                                    <h4 className="text-xs font-bold text-red-700 uppercase tracking-wide mb-0.5">Bolt Check Overdue</h4>
-                                    <p className="text-sm font-bold text-slate-800 truncate">{b.name}</p>
-                                    <p className="text-xs text-slate-500 mt-1">Last check: {b.lastMaintenanceDate || 'Never'}</p>
-                                </div>
-                            </div>
-                        ))}
-
                         {expiringContracts.map(c => (
                             <div key={c.id} className="p-4 bg-gradient-to-r from-amber-50 to-white rounded-2xl border border-amber-100 shadow-sm flex items-start gap-3">
                                 <div className="p-2 bg-white rounded-xl text-amber-500 shadow-sm border border-amber-50 shrink-0">

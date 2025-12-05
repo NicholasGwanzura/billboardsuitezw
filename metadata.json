@@ -1,6 +1,10 @@
 {
   "name": "Billboard Suite Dreambox",
+<<<<<<< HEAD
   "version": "1.7.3",
+=======
+  "version": "1.5.9",
+>>>>>>> parent of 53a7763 (feat: Introduce billboard maintenance tracking)
   "description": "Premium billboard rental management system featuring inventory tracking, financial operations, and real-time analytics.",
   "requestFramePermissions": []
 }

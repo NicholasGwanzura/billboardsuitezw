@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   LayoutDashboard, Map, Users, FileText, CreditCard, Receipt, Settings as SettingsIcon,
-  Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, Radio, ChevronRight, Box, Wrench
+  Menu, X, Bell, LogOut, Printer, Globe, PieChart, Wallet, Radio, ChevronRight, Box
 } from 'lucide-react';
 import { getCurrentUser, logout } from '../services/authService';
 import { getSystemAlertCount, triggerAutoBackup, runAutoBilling } from '../services/mockData';
@@ -46,7 +46,6 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
     { id: 'analytics', label: 'Profit & Analytics', icon: PieChart },
     { id: 'billboards', label: 'Billboards', icon: Map },
     { id: 'rentals', label: 'Rentals', icon: FileText },
-    { id: 'maintenance', label: 'Maintenance', icon: Wrench },
     { id: 'outsourced', label: 'Outsourced', icon: Globe },
     { id: 'payments', label: 'Payments', icon: Wallet },
     { id: 'clients', label: 'Clients', icon: Users },
@@ -143,7 +142,7 @@ export const Layout: React.FC<LayoutProps> = ({ children, currentPage, onNavigat
            
            <div className="flex items-center justify-between text-[10px] text-slate-500 py-1 px-1">
               <span className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse shadow-[0_0_8px_rgba(34,197,94,0.6)]"></div> System Online</span>
-              <span className="font-mono opacity-50">v1.7.0</span>
+              <span className="font-mono opacity-50">v1.5.7</span>
            </div>
         </div>
       </aside>

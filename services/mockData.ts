@@ -1,5 +1,5 @@
 
-import { Billboard, BillboardType, Client, Contract, Invoice, Expense, User, PrintingJob, OutsourcedBillboard, AuditLogEntry, CompanyProfile, VAT_RATE, MaintenanceRecord } from '../types';
+import { Billboard, BillboardType, Client, Contract, Invoice, Expense, User, PrintingJob, OutsourcedBillboard, AuditLogEntry, CompanyProfile, VAT_RATE } from '../types';
 
 export const ZIM_TOWNS = [
   "Harare", "Bulawayo", "Mutare", "Gweru", "Kwekwe", 
@@ -217,7 +217,6 @@ const STORAGE_KEYS = {
     LOGS: 'bs_logs',
     OUTSOURCED: 'bs_outsourced',
     PRINTING: 'bs_printing',
-    MAINTENANCE: 'bs_maintenance',
     LOGO: 'bs_logo',
     PROFILE: 'bs_company_profile',
     LAST_BACKUP: 'bs_last_backup_meta',
@@ -311,7 +310,6 @@ export let auditLogs: AuditLogEntry[] = loadFromStorage(STORAGE_KEYS.LOGS, [
 ]) || [];
 export let outsourcedBillboards: OutsourcedBillboard[] = loadFromStorage(STORAGE_KEYS.OUTSOURCED, []) || [];
 export let printingJobs: PrintingJob[] = loadFromStorage(STORAGE_KEYS.PRINTING, []) || [];
-export let maintenanceRecords: MaintenanceRecord[] = loadFromStorage(STORAGE_KEYS.MAINTENANCE, []) || [];
 
 const defaultUsers: User[] = [
   { id: '1', firstName: 'Admin', lastName: 'User', role: 'Admin', email: 'admin@spiritus.com', password: 'password' }
@@ -363,7 +361,7 @@ export const createSystemBackup = () => {
         timestamp: new Date().toISOString(),
         data: {
             billboards, contracts, clients, invoices, expenses, 
-            users, outsourcedBillboards, auditLogs, printingJobs, maintenanceRecords, companyLogo, companyProfile
+            users, outsourcedBillboards, auditLogs, printingJobs, companyLogo, companyProfile
         }
     }, null, 2);
 };
@@ -391,7 +389,7 @@ export const triggerAutoBackup = () => {
         timestamp: new Date().toISOString(),
         data: {
             billboards, contracts, clients, invoices, expenses, 
-            users, outsourcedBillboards, auditLogs, printingJobs, maintenanceRecords, companyLogo, companyProfile
+            users, outsourcedBillboards, auditLogs, printingJobs, companyLogo, companyProfile
         }
     };
     saveToStorage(STORAGE_KEYS.AUTO_BACKUP, backupData);
@@ -487,7 +485,6 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
         saveToStorage(STORAGE_KEYS.OUTSOURCED, backup.data.outsourcedBillboards || []);
         saveToStorage(STORAGE_KEYS.LOGS, backup.data.auditLogs || []);
         saveToStorage(STORAGE_KEYS.PRINTING, backup.data.printingJobs || []);
-        saveToStorage(STORAGE_KEYS.MAINTENANCE, backup.data.maintenanceRecords || []);
         saveToStorage(STORAGE_KEYS.LOGO, backup.data.companyLogo || '');
         saveToStorage(STORAGE_KEYS.PROFILE, backup.data.companyProfile || DEFAULT_PROFILE);
 
@@ -500,6 +497,7 @@ export const restoreSystemBackup = (jsonString: string): boolean => {
 
 export const RELEASE_NOTES = [
     {
+<<<<<<< HEAD
         version: '1.7.3',
         date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
         title: 'Enhanced Safety Inspections',
@@ -523,9 +521,56 @@ export const RELEASE_NOTES = [
         version: '1.7.1',
         date: '2/22/2026 07:00 PM',
         title: 'Domain Deployment Verification',
+=======
+        version: '1.5.9',
+        date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        title: 'Deployment & Stability Build',
+>>>>>>> parent of 53a7763 (feat: Introduce billboard maintenance tracking)
         features: [
             'System Validation: Confirmed deployment pipeline integrity for custom domain mapping.',
             'Cloud Run Integration: Verified secure connection and routing.'
+        ]
+    },
+    {
+        version: '1.5.8',
+        date: '2/22/2026 06:00 PM',
+        title: 'Dreambox Brand Identity Refresh',
+        features: [
+            'UI/UX Overhaul: Updated application color palette to Royal Indigo and Electric Violet to match Dreambox branding.',
+            'Typography: Switched to "Plus Jakarta Sans" for a premium, modern enterprise look.',
+            'Login Redesign: Revamped authentication screens with split-layout visuals and glassmorphism effects.',
+            'Visual Consistency: Standardized gradients, shadows, and component styling across the platform.'
+        ]
+    },
+    {
+        version: '1.5.7',
+        date: '2/22/2026 05:30 PM',
+        title: 'Enhanced Import & Rate Management',
+        features: [
+            'CSV Import Upgrade: Added support for "Agreed Monthly Rate" to override standard billboard card rates during import.',
+            'Payment Schedule Support: Added "Billing Day" column to CSV import for setting client-specific billing preferences automatically.',
+            'Fixed data mapping for imported contracts to ensure accurate financial tracking.'
+        ]
+    },
+    {
+        version: '1.5.6',
+        date: '2/22/2026 05:00 PM',
+        title: 'Bulk Import & Automation',
+        features: [
+            'Bulk Billboard Import: Upload CSV files to add multiple billboards at once.',
+            'Auto-Contract Generation: Automatically create contracts and clients from the imported CSV data.',
+            'Added "Download Template" for easy data formatting.',
+            'Enhanced data validation during import to prevent duplicates.'
+        ]
+    },
+    {
+        version: '1.5.5',
+        date: '2/22/2026 04:30 PM',
+        title: 'Automated Billing Engine',
+        features: [
+            'Automated Invoice Generation: The system now automatically generates monthly rental invoices for active contracts.',
+            'Smart Billing Dates: Invoices are created on the 28th by default, or on the client\'s specific preferred billing day.',
+            'Duplicate Protection: Prevents double-billing for the same contract within the same month.'
         ]
     }
 ];
@@ -539,7 +584,6 @@ export const getAuditLogs = () => auditLogs || [];
 export const getUsers = () => users || [];
 export const getClients = () => clients || [];
 export const getOutsourcedBillboards = () => outsourcedBillboards || [];
-export const getMaintenanceRecords = () => maintenanceRecords || [];
 export const getCompanyLogo = () => companyLogo;
 export const getCompanyProfile = () => companyProfile;
 
@@ -620,6 +664,7 @@ export const getExpiringContracts = () => {
     });
 };
 
+<<<<<<< HEAD
 export const getOverdueMaintenance = () => {
     const today = new Date();
     const threeMonthsAgo = new Date();
@@ -632,8 +677,10 @@ export const getOverdueMaintenance = () => {
     });
 };
 
+=======
+>>>>>>> parent of 53a7763 (feat: Introduce billboard maintenance tracking)
 export const getOverdueInvoices = () => invoices.filter(i => i.status === 'Pending' || i.status === 'Overdue');
-export const getSystemAlertCount = () => getExpiringContracts().length + getOverdueInvoices().length + getOverdueMaintenance().length;
+export const getSystemAlertCount = () => getExpiringContracts().length + getOverdueInvoices().length;
 
 // Generate Dynamic Trend Data based on Actual Invoices
 export const getFinancialTrends = () => {
@@ -651,4 +698,165 @@ export const getFinancialTrends = () => {
         const monthlyRevenue = invoices
             .filter(inv => {
                 const invDate = new Date(inv.date);
+<<<<<<< HEAD
                 return inv.type === 'Invoice' && invDate.getMonth() === monthIndex && invDate.getFullYear()
+=======
+                return inv.type === 'Invoice' && invDate.getMonth() === monthIndex && invDate.getFullYear() === year;
+            })
+            .reduce((acc, curr) => acc + curr.total, 0);
+
+        // Calculate Expenses for this month
+        const monthlyExpenses = expenses
+            .filter(exp => {
+                const expDate = new Date(exp.date);
+                return expDate.getMonth() === monthIndex && expDate.getFullYear() === year;
+            })
+            .reduce((acc, curr) => acc + curr.amount, 0);
+            
+        // Calculate Printing Costs for this month (approx)
+        const monthlyPrinting = printingJobs
+            .filter(job => {
+                const jobDate = new Date(job.date);
+                return jobDate.getMonth() === monthIndex && jobDate.getFullYear() === year;
+            })
+            .reduce((acc, curr) => acc + curr.totalCost, 0);
+
+        const totalExpenses = monthlyExpenses + monthlyPrinting;
+
+        result.push({
+            name: monthName,
+            revenue: monthlyRevenue,
+            expenses: totalExpenses,
+            margin: monthlyRevenue - totalExpenses
+        });
+    }
+
+    // Add a projection for next month based on active contracts
+    const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 1);
+    const activeContractRevenue = contracts
+        .filter(c => c.status === 'Active').reduce((acc, c) => acc + c.monthlyRate, 0);
+    
+    // Estimate expenses based on average of last 3 months
+    const avgExpenses = result.slice(-3).reduce((acc, curr) => acc + curr.expenses, 0) / 3 || 0;
+
+    result.push({
+        name: nextMonth.toLocaleString('default', { month: 'short' }) + ' (Proj)',
+        revenue: activeContractRevenue,
+        expenses: Math.round(avgExpenses),
+        margin: activeContractRevenue - Math.round(avgExpenses),
+        isProjection: true
+    });
+
+    return result;
+};
+
+export const logAction = (action: string, details: string) => {
+    const log: AuditLogEntry = { id: `log-${Date.now()}`, timestamp: new Date().toLocaleString(), action, details, user: 'Current User' };
+    auditLogs = [log, ...auditLogs];
+    saveToStorage(STORAGE_KEYS.LOGS, auditLogs);
+};
+
+export const addBillboard = (billboard: Billboard) => { 
+    billboards = [...billboards, billboard]; 
+    saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
+    logAction('Create Billboard', `Added ${billboard.name} (${billboard.type})`); 
+};
+export const updateBillboard = (updated: Billboard) => { 
+    billboards = billboards.map(b => b.id === updated.id ? updated : b); 
+    saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
+    logAction('Update Billboard', `Updated details for ${updated.name}`); 
+};
+export const deleteBillboard = (id: string) => { 
+    const target = billboards.find(b => b.id === id); 
+    if (target) { 
+        billboards = billboards.filter(b => b.id !== id); 
+        saveToStorage(STORAGE_KEYS.BILLBOARDS, billboards); 
+        logAction('Delete Billboard', `Removed ${target.name} from inventory`);
+    }
+};
+
+export const addContract = (contract: Contract) => { 
+    contracts = [...contracts, contract]; 
+    saveToStorage(STORAGE_KEYS.CONTRACTS, contracts); 
+    
+    // Update Billboard Status if Static
+    const billboard = billboards.find(b => b.id === contract.billboardId);
+    if(billboard) {
+        if(billboard.type === BillboardType.Static) {
+            if(contract.side === 'A' || contract.details.includes('Side A')) billboard.sideAStatus = 'Rented';
+            if(contract.side === 'B' || contract.details.includes('Side B')) billboard.sideBStatus = 'Rented';
+            if(contract.side === 'Both') { billboard.sideAStatus = 'Rented'; billboard.sideBStatus = 'Rented'; }
+            if(contract.details.includes('Side A') && contract.clientId) billboard.sideAClientId = contract.clientId;
+            if(contract.details.includes('Side B') && contract.clientId) billboard.sideBClientId = contract.clientId;
+        } else if (billboard.type === BillboardType.LED) {
+            billboard.rentedSlots = (billboard.rentedSlots || 0) + 1;
+        }
+        updateBillboard(billboard);
+    }
+    logAction('Create Contract', `New contract for ${contract.billboardId}`); 
+};
+
+export const deleteContract = (id: string) => {
+    const contract = contracts.find(c => c.id === id);
+    if(contract) {
+        contracts = contracts.filter(c => c.id !== id);
+        saveToStorage(STORAGE_KEYS.CONTRACTS, contracts);
+        
+        // Free up the billboard
+        const billboard = billboards.find(b => b.id === contract.billboardId);
+        if(billboard) {
+            if(billboard.type === BillboardType.Static) {
+                if(contract.side === 'A' || contract.details.includes('Side A')) { billboard.sideAStatus = 'Available'; billboard.sideAClientId = undefined; }
+                if(contract.side === 'B' || contract.details.includes('Side B')) { billboard.sideBStatus = 'Available'; billboard.sideBClientId = undefined; }
+                if(contract.side === 'Both') { 
+                    billboard.sideAStatus = 'Available'; billboard.sideBStatus = 'Available'; 
+                    billboard.sideAClientId = undefined; billboard.sideBClientId = undefined;
+                }
+            } else if(billboard.type === BillboardType.LED) {
+                billboard.rentedSlots = Math.max(0, (billboard.rentedSlots || 0) - 1);
+            }
+            updateBillboard(billboard);
+        }
+        logAction('Delete Contract', `Removed contract ${id}`);
+    }
+};
+
+export const addInvoice = (invoice: Invoice) => { invoices = [invoice, ...invoices]; saveToStorage(STORAGE_KEYS.INVOICES, invoices); logAction('Create Invoice', `Created ${invoice.type} #${invoice.id} ($${invoice.total})`); };
+export const markInvoiceAsPaid = (id: string) => { invoices = invoices.map(i => i.id === id ? { ...i, status: 'Paid' } : i); saveToStorage(STORAGE_KEYS.INVOICES, invoices); logAction('Payment', `Marked Invoice #${id} as Paid`); };
+export const addExpense = (expense: Expense) => { expenses = [expense, ...expenses]; saveToStorage(STORAGE_KEYS.EXPENSES, expenses); logAction('Expense', `Recorded expense: ${expense.description} ($${expense.amount})`); };
+export const addClient = (client: Client) => { 
+    clients = [...clients, client]; 
+    saveToStorage(STORAGE_KEYS.CLIENTS, clients); 
+    logAction('Create Client', `Added ${client.companyName}`); 
+};
+export const updateClient = (updated: Client) => {
+    clients = clients.map(c => c.id === updated.id ? updated : c);
+    saveToStorage(STORAGE_KEYS.CLIENTS, clients);
+    logAction('Update Client', `Updated info for ${updated.companyName}`);
+};
+export const deleteClient = (id: string) => { 
+    const target = clients.find(c => c.id === id); 
+    if (target) { 
+        clients = clients.filter(c => c.id !== id); 
+        saveToStorage(STORAGE_KEYS.CLIENTS, clients); 
+        logAction('Delete Client', `Removed ${target.companyName}`); 
+    }
+};
+export const addUser = (user: User) => { users = [...users, user]; saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Added user ${user.email}`); };
+export const updateUser = (updated: User) => { users = users.map(u => u.id === updated.id ? updated : u); saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Updated user ${updated.email}`); };
+export const deleteUser = (id: string) => { users = users.filter(u => u.id !== id); saveToStorage(STORAGE_KEYS.USERS, users); logAction('User Mgmt', `Deleted user ID ${id}`); };
+export const addOutsourcedBillboard = (b: OutsourcedBillboard) => { outsourcedBillboards = [...outsourcedBillboards, b]; saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); logAction('Outsourcing', `Added outsourced unit ${b.billboardId}`); };
+export const updateOutsourcedBillboard = (updated: OutsourcedBillboard) => { outsourcedBillboards = outsourcedBillboards.map(b => b.id === updated.id ? updated : b); saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); };
+export const deleteOutsourcedBillboard = (id: string) => { outsourcedBillboards = outsourcedBillboards.filter(b => b.id !== id); saveToStorage(STORAGE_KEYS.OUTSOURCED, outsourcedBillboards); };
+
+// Aliases for compatibility
+export { 
+  billboards as mockBillboards,
+  clients as mockClients,
+  contracts as mockContracts,
+  invoices as mockInvoices,
+  expenses as mockExpenses,
+  printingJobs as mockPrintingJobs,
+  outsourcedBillboards as mockOutsourcedBillboards
+};
+>>>>>>> parent of 53a7763 (feat: Introduce billboard maintenance tracking)
